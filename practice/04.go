@@ -130,11 +130,9 @@ func calcDaysArray() {
 	for i := 0; i < len(months); i++ {
 		if months[i][0] < month {
 			result += months[i][1]
-			fmt.Println("result:", result)
 		}
 	}
 
-	// year&4 == 0 && year%100 != 0 || year%400 == 0 ? result += 29 : result += 28
 	if month > 2 {
 		if year&4 == 0 && year%100 != 0 || year%400 == 0 {
 			result += 29
@@ -143,6 +141,5 @@ func calcDaysArray() {
 		}
 	}
 
-	fmt.Println("result:", result)
-	fmt.Printf("%d年%d月%d日是%d的第%d天\n", year, month, day, result)
+	fmt.Printf("%d年%d月%d日是%d的第%d天\n", year, month, day, year, result)
 }
