@@ -12,8 +12,8 @@ blog-service
 │  ├─ routers     // 路由相关逻辑
 │  └─ service     // 项目核心业务逻辑
 ├─ pkg            // 项目相关的模块包
-├─ scripts        // 项目生成的临时文件
-├─ storage        // 各类构建、安装、分析等操作的脚本
+├─ scripts        // 各类构建、安装、分析等操作的脚本
+├─ storage        // 项目生成的临时文件
 ├─ thrid_party    // 第三方资源工具，如Swagger UI   
 ├─ go.mod         
 ├─ go.sum 
