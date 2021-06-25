@@ -6,7 +6,7 @@ blog-service
 ├─ docs           // 文档
 ├─ global         // 全局变量
 ├─ internal       // 内部模块
-│  ├─ dao         //数据访问层  
+│  ├─ dao         // 数据访问层  
 │  ├─ middleware  // HTTP中间件
 │  ├─ model       // 模型层
 │  ├─ routers     // 路由相关逻辑
