@@ -1,0 +1,22 @@
+Server: 
+  RunMode: debug
+  HttpPort: 9090
+  ReadTimeout: 60
+  WriteTimeout: 60
+App:
+  DefaultPageSize: 10
+  MaxPageSize: 100
+  LogSevaPath: stoage/logs
+  LogFileName: app
+  logFileExt: .log
+Database:
+  DBType: mysql
+  Username: root
+  Password: 123456
+  Host: 119.3.48.150:12306
+  DBName: blog_serivce
+  TablePrefix: blog_
+  Charset: utf8
+  ParseTime: True
+  MaxIdleConns: 10
+  MaxOpenConns: 30
