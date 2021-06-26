@@ -79,7 +79,7 @@ func (e *Error) StatusCode() int {
 
 	case TooManyRequests.Code():
 		return http.StatusTooManyRequests
-		
+
 	}
 
 	return http.StatusInternalServerError
