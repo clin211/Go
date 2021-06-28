@@ -14,9 +14,9 @@ Database:
   Username: root
   Password: 123456
   Host: 119.3.48.150:12306
-  DBName: blog_serivce
+  DBName: blog_service
   TablePrefix: blog_
   Charset: utf8
-  ParseTime: True
+  ParseTime: true
   MaxIdleConns: 10
   MaxOpenConns: 30

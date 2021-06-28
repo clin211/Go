@@ -16,13 +16,11 @@ import (
 
 func init() {
 	err := setupSetting()
-
 	if err != nil {
 		log.Fatalf("init.setupSetting err: %v", err)
 	}
 
 	err = setupLogger()
-
 	if err != nil {
 		log.Fatalf("init.setupLogger err: %v", err)
 	}
@@ -38,6 +36,8 @@ func main() {
 	gin.SetMode(global.ServerSetting.RunMode)
 	router := routers.NewRouter()
 
+	global.Logger.Infof("%s: blog-service/%s", "Forest", "blog-service")
+
 	s := &http.Server{
 		Addr:           ":" + global.ServerSetting.HttpPort,
 		Handler:        router,
@@ -45,7 +45,7 @@ func main() {
 		WriteTimeout:   global.ServerSetting.WriteTimeout,
 		MaxHeaderBytes: 1 << 20,
 	}
-	
+
 	s.ListenAndServe()
 }
 
@@ -86,6 +86,7 @@ func setupLogger() error {
 		// 日志文件名的时间格式为本地时间
 		LocalTime: true,
 	}, "", log.LstdFlags).WithCaller(2)
+
 	return nil
 }
 

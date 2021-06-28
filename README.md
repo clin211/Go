@@ -22,3 +22,18 @@ blog-service
 ├─ main.go        
 └─ README.md        
 ```
+
+```go
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+
+
+    db, err := gorm.Open(mysql.Open(fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=%s&parseTime=%t&loc=Local",
+		databaseSetting.UserName,
+		databaseSetting.Password,
+		databaseSetting.Host,
+		databaseSetting.DBName,
+		databaseSetting.Charset,
+		databaseSetting.ParseTime,
+	)))
+```
