@@ -1,7 +1,9 @@
 package v1
 
 import (
-	"net/http"
+	"blog-service/global"
+	"blog-service/pkg/app"
+	"blog-service/pkg/errcode"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,10 +25,20 @@ func NewTag() Tag {
 // @Failure 500 {object} errcode.Error "内部错误"
 // @Router /api/v1/tags [get]
 func (t Tag) List(c *gin.Context)   {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "success",
-		"auther": "Forest",
-	})
+	param := struct {
+		Name  string `form:"name" binding:"max=100"`
+		State uint8  `form:"state,default=1" binding:"oneof=0 1"`
+	}{}
+	response := app.NewResponse(c)
+	valid, errs := app.BindAndValid(c, &param)
+	if !valid {
+		global.Logger.Errorf("app.BindAndValid errs: %v", errs)
+		response.ToErrorResponse(errcode.InvalidParams.WithDetails(errs.Errors()...))
+		return
+	}
+
+	response.ToResponse(gin.H{})
+	return
 }
 
 // @Summary 新增标签

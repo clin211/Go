@@ -12,7 +12,9 @@ require (
 	github.com/go-openapi/jsonreference v0.19.6 // indirect
 	github.com/go-openapi/spec v0.20.3 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
-	github.com/go-playground/validator/v10 v10.6.1 // indirect
+	github.com/go-playground/locales v0.13.0 // indirect
+	github.com/go-playground/universal-translator v0.17.0 // indirect
+	github.com/go-playground/validator/v10 v10.7.0 // indirect
 	github.com/jinzhu/gorm v1.9.12
 	github.com/kr/pty v1.1.5 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
@@ -38,9 +40,9 @@ require (
 	github.com/ugorji/go v1.2.6 // indirect
 	github.com/urfave/cli v1.22.5 // indirect
 	github.com/urfave/cli/v2 v2.3.0 // indirect
-	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e // indirect
+	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97 // indirect
 	golang.org/x/net v0.0.0-20210614182718-04defd469f4e // indirect
-	golang.org/x/sys v0.0.0-20210616094352-59db8d763f22 // indirect
+	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
 	golang.org/x/text v0.3.6 // indirect
 	golang.org/x/tools v0.1.4 // indirect
 	google.golang.org/protobuf v1.27.0 // indirect

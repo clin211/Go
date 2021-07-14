@@ -1,19 +1,20 @@
 package routers
 
 import (
+	"blog-service/internal/middleware"
 	v1 "blog-service/internal/routers/api/v1"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	_ "blog-service/docs"
-	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"github.com/gin-gonic/gin"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
 
 func NewRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
-
+	r.Use(middleware.Translations())
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	apiv1 := r.Group("/api/v1")
 	tag := v1.NewTag()
