@@ -1,10 +1,12 @@
 package app
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	ut "github.com/go-playground/universal-translator"
 	val "github.com/go-playground/validator/v10"
-	"strings"
 )
 
 type ValidError struct {
@@ -33,7 +35,9 @@ func (v ValidErrors) Errors() []string {
 
 func BindAndValid(c *gin.Context, v interface{}) (bool, ValidErrors) {
 	var errs ValidErrors
+	fmt.Println("v", v)
 	err := c.ShouldBind(v)
+	fmt.Println("err:", err)
 	if err != nil {
 		v := c.Value("trans")
 		trans, _ := v.(ut.Translator)

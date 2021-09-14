@@ -22,7 +22,6 @@ func NewArticle() Article {
 // @Router /api/v1/articles/{id} [get]
 func (a Article) Get(c *gin.Context) {
 	app.NewResponse(c).ToErrorResponse(errcode.ServerError)
-	return
 }
 
 // @Summary 获取多个文章
