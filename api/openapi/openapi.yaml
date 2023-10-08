@@ -1,13 +1,8 @@
-# Copyright 2023 Forest-211(changlin) <767425412lin@gmail.com>. All rights reserved.
-# Use of this source code is governed by a MIT style
-# license that can be found in the LICENSE file. The original repo for
-# this file is https://github.com/Forest-211/go/tree/miniblog.
-
-openapi: 3.0.3
+openapi: 3.1.0
 info:
-  title: Swagger Petstore - OpenAPI 3.0
+  title: Swagger Petstore - OpenAPI 3.1
   description: |-
-    This is a sample Pet Store Server based on the OpenAPI 3.0 specification.  You can find out more about
+    This is a sample Pet Store Server based on the OpenAPI 3.1 specification.  You can find out more about
     Swagger at [https://swagger.io](https://swagger.io). In the third iteration of the pet store, we've switched to the design first approach!
     You can now help us improve the API whether it's by making changes to the definition itself or to the code.
     That way, with time, we can improve the API in general, and expose some of the new features in OAS3.
@@ -54,29 +49,29 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Pet"
+              $ref: '#/components/schemas/Pet'
           application/xml:
             schema:
-              $ref: "#/components/schemas/Pet"
+              $ref: '#/components/schemas/Pet'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/Pet"
+              $ref: '#/components/schemas/Pet'
         required: true
       responses:
-        "200":
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Pet"
+                $ref: '#/components/schemas/Pet'
             application/xml:
               schema:
-                $ref: "#/components/schemas/Pet"
-        "400":
+                $ref: '#/components/schemas/Pet'
+        '400':
           description: Invalid ID supplied
-        "404":
+        '404':
           description: Pet not found
-        "405":
+        '405':
           description: Validation exception
       security:
         - petstore_auth:
@@ -93,25 +88,25 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Pet"
+              $ref: '#/components/schemas/Pet'
           application/xml:
             schema:
-              $ref: "#/components/schemas/Pet"
+              $ref: '#/components/schemas/Pet'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/Pet"
+              $ref: '#/components/schemas/Pet'
         required: true
       responses:
-        "200":
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Pet"
+                $ref: '#/components/schemas/Pet'
             application/xml:
               schema:
-                $ref: "#/components/schemas/Pet"
-        "405":
+                $ref: '#/components/schemas/Pet'
+        '405':
           description: Invalid input
       security:
         - petstore_auth:
@@ -138,20 +133,20 @@ paths:
               - pending
               - sold
       responses:
-        "200":
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Pet"
+                  $ref: '#/components/schemas/Pet'
             application/xml:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Pet"
-        "400":
+                  $ref: '#/components/schemas/Pet'
+        '400':
           description: Invalid status value
       security:
         - petstore_auth:
@@ -175,20 +170,20 @@ paths:
             items:
               type: string
       responses:
-        "200":
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Pet"
+                  $ref: '#/components/schemas/Pet'
             application/xml:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Pet"
-        "400":
+                  $ref: '#/components/schemas/Pet'
+        '400':
           description: Invalid tag value
       security:
         - petstore_auth:
@@ -210,18 +205,18 @@ paths:
             type: integer
             format: int64
       responses:
-        "200":
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Pet"
+                $ref: '#/components/schemas/Pet'
             application/xml:
               schema:
-                $ref: "#/components/schemas/Pet"
-        "400":
+                $ref: '#/components/schemas/Pet'
+        '400':
           description: Invalid ID supplied
-        "404":
+        '404':
           description: Pet not found
       security:
         - api_key: []
@@ -232,7 +227,7 @@ paths:
       tags:
         - pet
       summary: Updates a pet in the store with form data
-      description: ""
+      description: ''
       operationId: updatePetWithForm
       parameters:
         - name: petId
@@ -253,7 +248,7 @@ paths:
           schema:
             type: string
       responses:
-        "405":
+        '405':
           description: Invalid input
       security:
         - petstore_auth:
@@ -268,7 +263,7 @@ paths:
       parameters:
         - name: api_key
           in: header
-          description: ""
+          description: ''
           required: false
           schema:
             type: string
@@ -280,7 +275,7 @@ paths:
             type: integer
             format: int64
       responses:
-        "400":
+        '400':
           description: Invalid pet value
       security:
         - petstore_auth:
@@ -291,7 +286,7 @@ paths:
       tags:
         - pet
       summary: uploads an image
-      description: ""
+      description: ''
       operationId: uploadFile
       parameters:
         - name: petId
@@ -314,12 +309,12 @@ paths:
               type: string
               format: binary
       responses:
-        "200":
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponse"
+                $ref: '#/components/schemas/ApiResponse'
       security:
         - petstore_auth:
             - write:pets
@@ -332,7 +327,7 @@ paths:
       description: Returns a map of status codes to quantities
       operationId: getInventory
       responses:
-        "200":
+        '200':
           description: successful operation
           content:
             application/json:
@@ -354,21 +349,21 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Order"
+              $ref: '#/components/schemas/Order'
           application/xml:
             schema:
-              $ref: "#/components/schemas/Order"
+              $ref: '#/components/schemas/Order'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/Order"
+              $ref: '#/components/schemas/Order'
       responses:
-        "200":
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Order"
-        "405":
+                $ref: '#/components/schemas/Order'
+        '405':
           description: Invalid input
   /store/order/{orderId}:
     get:
@@ -386,18 +381,18 @@ paths:
             type: integer
             format: int64
       responses:
-        "200":
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Order"
+                $ref: '#/components/schemas/Order'
             application/xml:
               schema:
-                $ref: "#/components/schemas/Order"
-        "400":
+                $ref: '#/components/schemas/Order'
+        '400':
           description: Invalid ID supplied
-        "404":
+        '404':
           description: Order not found
     delete:
       tags:
@@ -414,9 +409,9 @@ paths:
             type: integer
             format: int64
       responses:
-        "400":
+        '400':
           description: Invalid ID supplied
-        "404":
+        '404':
           description: Order not found
   /user:
     post:
@@ -430,23 +425,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/User"
+              $ref: '#/components/schemas/User'
           application/xml:
             schema:
-              $ref: "#/components/schemas/User"
+              $ref: '#/components/schemas/User'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/User"
+              $ref: '#/components/schemas/User'
       responses:
         default:
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: '#/components/schemas/User'
             application/xml:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: '#/components/schemas/User'
   /user/createWithList:
     post:
       tags:
@@ -460,17 +455,17 @@ paths:
             schema:
               type: array
               items:
-                $ref: "#/components/schemas/User"
+                $ref: '#/components/schemas/User'
       responses:
-        "200":
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: '#/components/schemas/User'
             application/xml:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: '#/components/schemas/User'
         default:
           description: successful operation
   /user/login:
@@ -478,7 +473,7 @@ paths:
       tags:
         - user
       summary: Logs user into the system
-      description: ""
+      description: ''
       operationId: loginUser
       parameters:
         - name: username
@@ -494,7 +489,7 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: successful operation
           headers:
             X-Rate-Limit:
@@ -514,14 +509,14 @@ paths:
             application/json:
               schema:
                 type: string
-        "400":
+        '400':
           description: Invalid username/password supplied
   /user/logout:
     get:
       tags:
         - user
       summary: Logs out current logged in user session
-      description: ""
+      description: ''
       operationId: logoutUser
       parameters: []
       responses:
@@ -532,28 +527,28 @@ paths:
       tags:
         - user
       summary: Get user by user name
-      description: ""
+      description: ''
       operationId: getUserByName
       parameters:
         - name: username
           in: path
-          description: "The name that needs to be fetched. Use user1 for testing. "
+          description: 'The name that needs to be fetched. Use user1 for testing. '
           required: true
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: '#/components/schemas/User'
             application/xml:
               schema:
-                $ref: "#/components/schemas/User"
-        "400":
+                $ref: '#/components/schemas/User'
+        '400':
           description: Invalid username supplied
-        "404":
+        '404':
           description: User not found
     put:
       tags:
@@ -573,13 +568,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/User"
+              $ref: '#/components/schemas/User'
           application/xml:
             schema:
-              $ref: "#/components/schemas/User"
+              $ref: '#/components/schemas/User'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/User"
+              $ref: '#/components/schemas/User'
       responses:
         default:
           description: successful operation
@@ -597,9 +592,9 @@ paths:
           schema:
             type: string
       responses:
-        "400":
+        '400':
           description: Invalid username supplied
-        "404":
+        '404':
           description: User not found
 components:
   schemas:
@@ -609,22 +604,22 @@ components:
         id:
           type: integer
           format: int64
-          example: 10
+          examples: [10]
         petId:
           type: integer
           format: int64
-          example: 198772
+          examples: [198772]
         quantity:
           type: integer
           format: int32
-          example: 7
+          examples: [7]
         shipDate:
           type: string
           format: date-time
         status:
           type: string
           description: Order Status
-          example: approved
+          examples: [approved]
           enum:
             - placed
             - approved
@@ -639,17 +634,17 @@ components:
         id:
           type: integer
           format: int64
-          example: 100000
+          examples: [100000]
         username:
           type: string
-          example: fehguy
+          examples: [fehguy]
         address:
           type: array
           xml:
             name: addresses
             wrapped: true
           items:
-            $ref: "#/components/schemas/Address"
+            $ref: '#/components/schemas/Address'
       xml:
         name: customer
     Address:
@@ -657,16 +652,16 @@ components:
       properties:
         street:
           type: string
-          example: 437 Lytton
+          examples: [437 Lytton]
         city:
           type: string
-          example: Palo Alto
+          examples: [Palo Alto]
         state:
           type: string
-          example: CA
+          examples: [CA]
         zip:
           type: string
-          example: "94301"
+          examples: ['94301']
       xml:
         name: address
     Category:
@@ -675,10 +670,10 @@ components:
         id:
           type: integer
           format: int64
-          example: 1
+          examples: [1]
         name:
           type: string
-          example: Dogs
+          examples: [Dogs]
       xml:
         name: category
     User:
@@ -687,30 +682,30 @@ components:
         id:
           type: integer
           format: int64
-          example: 10
+          examples: [10]
         username:
           type: string
-          example: theUser
+          examples: [theUser]
         firstName:
           type: string
-          example: John
+          examples: [John]
         lastName:
           type: string
-          example: James
+          examples: [James]
         email:
           type: string
-          example: john@email.com
+          examples: [john@email.com]
         password:
           type: string
-          example: "12345"
+          examples: ['12345']
         phone:
           type: string
-          example: "12345"
+          examples: ['12345']
         userStatus:
           type: integer
           description: User Status
           format: int32
-          example: 1
+          examples: [1]
       xml:
         name: user
     Tag:
@@ -732,12 +727,12 @@ components:
         id:
           type: integer
           format: int64
-          example: 10
+          examples: [10]
         name:
           type: string
-          example: doggie
+          examples: [doggie]
         category:
-          $ref: "#/components/schemas/Category"
+          $ref: '#/components/schemas/Category'
         photoUrls:
           type: array
           xml:
@@ -751,7 +746,7 @@ components:
           xml:
             wrapped: true
           items:
-            $ref: "#/components/schemas/Tag"
+            $ref: '#/components/schemas/Tag'
         status:
           type: string
           description: pet status in the store
@@ -772,17 +767,17 @@ components:
         message:
           type: string
       xml:
-        name: "##default"
+        name: '##default'
   requestBodies:
     Pet:
       description: Pet object that needs to be added to the store
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Pet"
+            $ref: '#/components/schemas/Pet'
         application/xml:
           schema:
-            $ref: "#/components/schemas/Pet"
+            $ref: '#/components/schemas/Pet'
     UserArray:
       description: List of user object
       content:
@@ -790,7 +785,7 @@ components:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/User"
+              $ref: '#/components/schemas/User'
   securitySchemes:
     petstore_auth:
       type: oauth2
