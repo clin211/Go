@@ -59,6 +59,11 @@ swagger: # 启动 swagger 在线文档.
 tidy: # 自动添加/移除依赖包.
 	@go mod tidy
 
+.PHONY: hotload
+clean: # 清理构建产物、临时文件等.
+	@make all
+	@air
+
 .PHONY: clean
 clean: # 清理构建产物、临时文件等.
 	@-rm -vrf $(OUTPUT_DIR)
