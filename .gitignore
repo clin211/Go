@@ -83,3 +83,4 @@ tags
 # Custom
 /_output
 .dbdata
+/tmp
