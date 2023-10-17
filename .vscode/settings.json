@@ -6,6 +6,8 @@
         "Errorw",
         "Fatalw",
         "gosuri",
+        "healthz",
+        "httpsrv",
         "Infow",
         "miniblog",
         "Panicw",

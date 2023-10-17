@@ -1,17 +1,18 @@
-// Copyright 2023 Forest-211 &lt;767425412lin@gmail.com>. All rights reserved.
-// Use of this source code is governed by a MIT style
-// license that can be found in the LICENSE file. The original repo for
-// this file is https://github.com/Forest-211/go/tree/miniblog.
-
 package miniblog
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/Forest-211/miniblog/internal/pkg/log"
-	"github.com/Forest-211/miniblog/internal/pkg/version/verflag"
+	"github.com/Forest-211/miniblog/internal/pkg/middleware"
+	"github.com/Forest-211/miniblog/pkg/version/verflag"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -81,6 +82,11 @@ func run() error {
 	// 创建 Gin 引擎
 	g := gin.New()
 
+	// gin.Recovery() 中间件，用来捕获任何 panic，并恢复
+	mws := []gin.HandlerFunc{gin.Recovery(), middleware.NoCache, middleware.Cors, middleware.Secure, middleware.RequestID()}
+
+	g.Use(mws...)
+
 	// 注册 404 Handler.
 	g.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"code": 10003, "message": "Page not found."})
@@ -88,6 +94,7 @@ func run() error {
 
 	// 注册 /healthz handler.
 	g.GET("/healthz", func(c *gin.Context) {
+		log.C(c).Infow("Healthz function called")
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 	// 创建 HTTP Server 实例
@@ -96,9 +103,33 @@ func run() error {
 	// 运行 HTTP 服务器
 	// 打印一条日志，用来提示 HTTP 服务已经起来，方便排障
 	log.Infow("Start to listening the incoming requests on http address", "addr", viper.GetString("addr"))
-	if err := httpsrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		log.Fatalw(err.Error())
+	go func() {
+		// ErrServerClosed 错误，我们视为服务关闭时的正常报错行为，所以如果 ListenAndServe 返回的是该错误，我们并不打印错误信息
+		if err := httpsrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalw(err.Error())
+		}
+	}()
+
+	// 等待中断信号优雅地关闭服务器（10 秒超时)。
+	quit := make(chan os.Signal, 1)
+	// kill 默认会发送 syscall.SIGTERM 信号
+	// kill -2 发送 syscall.SIGINT 信号，我们常用的 CTRL + C 就是触发系统 SIGINT 信号
+	// kill -9 发送 syscall.SIGKILL 信号，但是不能被捕获，所以不需要添加它
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM) // 此处不会阻塞
+	<-quit                                               // 阻塞在此，当接收到上述两种信号时才会往下执行
+	log.Infow("Shutting down server ...")
+
+	// 创建 ctx 用于通知服务器 goroutine, 它有 10 秒时间完成当前正在处理的请求
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// 10 秒内优雅关闭服务（将未处理完的请求处理完再关闭服务），超过 10 秒就超时退出
+	if err := httpsrv.Shutdown(ctx); err != nil {
+		log.Errorw("Insecure Server forced to shutdown", "err", err)
+		return err
 	}
+
+	log.Infow("Server exiting")
 
 	return nil
 }

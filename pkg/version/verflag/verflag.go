@@ -1,8 +1,3 @@
-// Copyright 2023 Forest-211 &lt;767425412lin@gmail.com>. All rights reserved.
-// Use of this source code is governed by a MIT style
-// license that can be found in the LICENSE file. The original repo for
-// this file is https://github.com/Forest-211/go/tree/miniblog.
-
 package verflag
 
 import (
@@ -10,13 +5,12 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/Forest-211/miniblog/internal/pkg/version"
+	"github.com/Forest-211/miniblog/pkg/version"
 	"github.com/spf13/pflag"
 )
 
 type versionValue int
 
-// 定义一些常量.
 const (
 	VersionFalse versionValue = 0
 	VersionTrue  versionValue = 1

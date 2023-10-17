@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/gin-gonic/gin v1.9.1
+	github.com/google/uuid v1.1.2
 	github.com/gosuri/uitable v0.0.4
 	github.com/spf13/cobra v1.7.0
 	go.uber.org/zap v1.21.0
