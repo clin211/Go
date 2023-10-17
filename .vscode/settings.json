@@ -1,6 +1,13 @@
 {
     "cSpell.words": [
         "automaxprocs",
-        "miniblog"
+        "Debugw",
+        "dpanic",
+        "Errorw",
+        "Fatalw",
+        "Infow",
+        "miniblog",
+        "Panicw",
+        "Warnw"
     ]
 }
