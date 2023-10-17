@@ -5,9 +5,13 @@
         "dpanic",
         "Errorw",
         "Fatalw",
+        "gosuri",
         "Infow",
         "miniblog",
         "Panicw",
+        "pflag",
+        "uitable",
+        "verflag",
         "Warnw"
     ]
 }
