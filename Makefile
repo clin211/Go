@@ -70,3 +70,7 @@ clean: # 清理构建产物、临时文件等.
 clean: # 清理构建产物、临时文件等.
 	@-rm -vrf $(OUTPUT_DIR)
 	@-rm -vrf $(TMP_DIR)
+
+.PHONY: clean-db
+clean-db: # 清理数据库.
+	@-rm -vrf $(ROOT_DIR)/.dbdata

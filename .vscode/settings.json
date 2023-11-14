@@ -1,19 +1,23 @@
 {
     "cSpell.words": [
+        "asaskevich",
         "automaxprocs",
         "Debugw",
         "dpanic",
         "Errorw",
         "Fatalw",
         "gosuri",
+        "govalidator",
         "hcode",
         "healthz",
         "httpsrv",
         "Infow",
+        "jinzhu",
         "miniblog",
         "Panicw",
         "pflag",
         "runmode",
+        "struct",
         "uitable",
         "verflag",
         "Warnw"
