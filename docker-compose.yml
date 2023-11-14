@@ -2,6 +2,7 @@ version: "3.9"
 
 services:
   backend:
+    container_name: service
     build: .
     ports:
       - 8080:8080
@@ -11,6 +12,7 @@ services:
       - db
 
   db:
+    container_name: miniblog_db
     image: mysql:5.7.22
     restart: always
     environment:
