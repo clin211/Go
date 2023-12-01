@@ -62,7 +62,7 @@ tidy: # 自动添加/移除依赖包.
 	@go mod tidy
 
 .PHONY: hotload
-clean: # 清理构建产物、临时文件等.
+hotload: # 清理构建产物、临时文件等.
 	@make all
 	@air
 

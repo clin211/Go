@@ -38,7 +38,6 @@ func NewMySQL(opts *MySQLOptions) (*gorm.DB, error) {
 	if opts.LogLevel != 0 {
 		logLevel = logger.LogLevel(opts.LogLevel)
 	}
-	fmt.Println("url:", opts.DSN())
 	db, err := gorm.Open(mysql.Open(opts.DSN()), &gorm.Config{
 		Logger: logger.Default.LogMode(logLevel),
 	})
