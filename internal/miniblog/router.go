@@ -13,6 +13,7 @@ import (
 func installRouters(g *gin.Engine) error {
 	// register 404 handler
 	g.NoRoute(func(c *gin.Context) {
+		log.C(c).Infow("404 handler called", "method", c.Request.Method, "path", c.Request.URL.Path)
 		core.WriteResponse(c, errno.ErrPageNotFound, nil)
 	})
 
@@ -22,13 +23,15 @@ func installRouters(g *gin.Engine) error {
 		core.WriteResponse(c, nil, map[string]string{"status": "ok"})
 	})
 
-	uc := user.NewUserController(store.S)
+	uc := user.New(store.S)
 
+	// 创建 v1 路由组
 	v1 := g.Group("/v1")
 	{
-		user := v1.Group("/users")
+		// 创建 users 路由组
+		users := v1.Group("/users")
 		{
-			user.POST("", uc.Create)
+			users.POST("/", uc.Create) // 创建用户
 		}
 	}
 

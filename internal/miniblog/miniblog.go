@@ -10,8 +10,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Forest-211/miniblog/internal/pkg/core"
-	"github.com/Forest-211/miniblog/internal/pkg/errno"
 	"github.com/Forest-211/miniblog/internal/pkg/log"
 	"github.com/Forest-211/miniblog/internal/pkg/middleware"
 	"github.com/Forest-211/miniblog/pkg/version/verflag"
@@ -94,17 +92,10 @@ func run() error {
 
 	g.Use(mws...)
 
-	// 注册 404 Handler.
-	g.NoRoute(func(c *gin.Context) {
-		core.WriteResponse(c, errno.ErrPageNotFound, nil)
-	})
+	if err := installRouters(g); err != nil {
+		return err
+	}
 
-	// 注册 /healthz handler.
-	g.GET("/healthz", func(c *gin.Context) {
-		log.C(c).Infow("Healthz function called")
-
-		core.WriteResponse(c, nil, map[string]string{"status": "ok"})
-	})
 	// 创建 HTTP Server 实例
 	httpsrv := &http.Server{Addr: viper.GetString("addr"), Handler: g}
 
