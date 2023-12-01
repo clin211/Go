@@ -19,6 +19,7 @@ func (ctrl *UserController) Create(c *gin.Context) {
 
 	// 接收 HTTP 请求中的 JSON 数据、并进行参数解析
 	if err := c.ShouldBindJSON(&r); err != nil {
+		log.C(c).Errorw("ShouldBindJSON error", "err", err)
 		core.WriteResponse(c, errno.ErrBind, nil)
 		return
 	}
@@ -30,11 +31,11 @@ func (ctrl *UserController) Create(c *gin.Context) {
 	}
 
 	// 逻辑处理
-	// if err := ctrl.b.Users().Create(c, &r); err != nil {
-	// 	core.WriteResponse(c, err, nil)
-	// 	return
-	// }
+	if err := ctrl.b.Users().Create(c, &r); err != nil {
+		core.WriteResponse(c, err, nil)
+		return
+	}
 
 	// 返回结果
-	core.WriteResponse(c, nil, nil)
+	core.WriteResponse(c, errno.SignUpSuccess, nil)
 }

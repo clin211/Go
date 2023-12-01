@@ -15,4 +15,7 @@ var (
 
 	// ErrInvalidParameter 表示所有验证失败的错误.
 	ErrInvalidParameter = &Errno{HTTP: 400, Code: "InvalidParameter", Message: "Parameter verification failed."}
+
+	// Sign up success
+	SignUpSuccess = &Errno{HTTP: 200, Code: "SignUpSuccess", Message: "Sign up success."}
 )
