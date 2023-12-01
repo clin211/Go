@@ -8,6 +8,7 @@ import (
 	"github.com/Forest-211/miniblog/internal/pkg/core"
 	"github.com/Forest-211/miniblog/internal/pkg/errno"
 	"github.com/Forest-211/miniblog/internal/pkg/log"
+	mw "github.com/Forest-211/miniblog/internal/pkg/middleware"
 )
 
 func installRouters(g *gin.Engine) error {
@@ -25,6 +26,9 @@ func installRouters(g *gin.Engine) error {
 
 	uc := user.New(store.S)
 
+	// login
+	g.POST("/login", uc.Login)
+
 	// 创建 v1 路由组
 	v1 := g.Group("/v1")
 	{
@@ -32,6 +36,8 @@ func installRouters(g *gin.Engine) error {
 		users := v1.Group("/users")
 		{
 			users.POST("/", uc.Create) // 创建用户
+			users.PUT(":name/change-password", uc.ChangePassword)
+			users.Use(mw.Authn())
 		}
 	}
 

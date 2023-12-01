@@ -1,10 +1,12 @@
 {
     "cSpell.words": [
+        "alphanum",
         "asaskevich",
         "automaxprocs",
         "Debugw",
         "dpanic",
         "Errorw",
+        "euqa",
         "Fatalw",
         "gosuri",
         "govalidator",
@@ -17,6 +19,7 @@
         "Panicw",
         "pflag",
         "runmode",
+        "stringlength",
         "struct",
         "uitable",
         "verflag",
