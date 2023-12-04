@@ -9,6 +9,7 @@ import (
 	"github.com/Forest-211/miniblog/internal/pkg/errno"
 	"github.com/Forest-211/miniblog/internal/pkg/log"
 	mw "github.com/Forest-211/miniblog/internal/pkg/middleware"
+	"github.com/Forest-211/miniblog/pkg/auth"
 )
 
 func installRouters(g *gin.Engine) error {
@@ -24,7 +25,12 @@ func installRouters(g *gin.Engine) error {
 		core.WriteResponse(c, nil, map[string]string{"status": "ok"})
 	})
 
-	uc := user.New(store.S)
+	authz, err := auth.NewAuthz(store.S.DB())
+	if err != nil {
+		return err
+	}
+
+	uc := user.New(store.S, authz)
 
 	// login
 	g.POST("/login", uc.Login)
@@ -35,9 +41,13 @@ func installRouters(g *gin.Engine) error {
 		// 创建 users 路由组
 		users := v1.Group("/users")
 		{
-			users.POST("/", uc.Create) // 创建用户
-			users.PUT(":name/change-password", uc.ChangePassword)
-			users.Use(mw.Authn())
+			users.POST("/", uc.Create)                            // 创建用户
+			users.PUT(":name/change-password", uc.ChangePassword) // 修改密码
+			users.Use(mw.Authn(), mw.Authz(authz))                // 认证中间件
+			users.GET(":name", uc.Detail)                         // 获取用户
+			users.PUT(":name", uc.Update)                         // 更新用户
+			users.GET("", uc.List)                                // 获取用户
+			users.DELETE(":name", uc.Delete)                      // 删除用户
 		}
 	}
 

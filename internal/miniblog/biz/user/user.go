@@ -2,7 +2,11 @@ package user
 
 import (
 	"context"
+	"errors"
 	"regexp"
+
+	"github.com/jinzhu/copier"
+	"gorm.io/gorm"
 
 	"github.com/Forest-211/miniblog/internal/miniblog/store"
 	"github.com/Forest-211/miniblog/internal/pkg/errno"
@@ -10,14 +14,14 @@ import (
 	v1 "github.com/Forest-211/miniblog/pkg/api/miniblog/v1"
 	"github.com/Forest-211/miniblog/pkg/auth"
 	"github.com/Forest-211/miniblog/pkg/token"
-	"github.com/jinzhu/copier"
 )
 
 // UserBiz 定义了 user 模块在 biz 层所实现的方法.
 type UserBiz interface {
 	Create(ctx context.Context, r *v1.CreateUserRequest) error
-	ChangePassword(ctx context.Context, username string, r *v1.ChangePasswordRequest) error
+	Get(ctx context.Context, username string) (*v1.GetUserResponse, error)
 	Login(ctx context.Context, r *v1.LoginRequest) (*v1.LoginResponse, error)
+	ChangePassword(ctx context.Context, username string, r *v1.ChangePasswordRequest) error
 }
 
 // UserBiz 接口的实现.
@@ -47,6 +51,26 @@ func (b *userBiz) Create(ctx context.Context, r *v1.CreateUserRequest) error {
 	}
 
 	return nil
+}
+
+// Get 是 UserBiz 接口中 `Get` 方法的实现.
+func (b *userBiz) Get(ctx context.Context, username string) (*v1.GetUserResponse, error) {
+	user, err := b.ds.Users().Get(ctx, username)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errno.ErrUserNotFound
+		}
+
+		return nil, err
+	}
+
+	var resp v1.GetUserResponse
+	_ = copier.Copy(&resp, user)
+
+	resp.CreatedAt = user.CreatedAt.Format("2006-01-02 15:04:05")
+	resp.UpdatedAt = user.UpdatedAt.Format("2006-01-02 15:04:05")
+
+	return &resp, nil
 }
 
 // ChangePassword 是 UserBiz 接口中 `ChangePassword` 方法的实现.
@@ -87,5 +111,5 @@ func (b *userBiz) Login(ctx context.Context, r *v1.LoginRequest) (*v1.LoginRespo
 		return nil, errno.ErrSignToken
 	}
 
-	return &v1.LoginResponse{Token: t}, nil
+	return &v1.LoginResponse{Token: "Bearer " + t}, nil
 }

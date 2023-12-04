@@ -28,3 +28,17 @@ type ChangePasswordRequest struct {
 	// 新密码.
 	NewPassword string `json:"newPassword" valid:"required,stringlength(6|18)"`
 }
+
+// GetUserResponse 指定了 `GET /v1/users/{name}` 接口的返回参数.
+type GetUserResponse UserInfo
+
+// UserInfo 指定了用户的详细信息.
+type UserInfo struct {
+	Username  string `json:"username"`
+	Nickname  string `json:"nickname"`
+	Email     string `json:"email"`
+	Phone     string `json:"phone"`
+	PostCount int64  `json:"postCount"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
+}

@@ -1,6 +1,8 @@
 package user
 
 import (
+	"fmt"
+
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 
@@ -9,6 +11,8 @@ import (
 	"github.com/Forest-211/miniblog/internal/pkg/log"
 	v1 "github.com/Forest-211/miniblog/pkg/api/miniblog/v1"
 )
+
+const defaultMethods = "(GET)|(POST)|(PUT)|(DELETE)"
 
 func (ctrl *UserController) Create(c *gin.Context) {
 	// 写入日志
@@ -32,6 +36,12 @@ func (ctrl *UserController) Create(c *gin.Context) {
 
 	// 逻辑处理
 	if err := ctrl.b.Users().Create(c, &r); err != nil {
+		core.WriteResponse(c, err, nil)
+		return
+	}
+
+	if _, err := ctrl.a.AddNamedPolicy("p", r.Username, "/v1/users/"+r.Username, defaultMethods); err != nil {
+		fmt.Println("error: ", err)
 		core.WriteResponse(c, err, nil)
 		return
 	}
