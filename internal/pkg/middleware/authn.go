@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"fmt"
+
 	"github.com/Forest-211/miniblog/internal/pkg/core"
 	"github.com/Forest-211/miniblog/internal/pkg/errno"
 	"github.com/Forest-211/miniblog/internal/pkg/known"
@@ -13,6 +15,7 @@ func Authn() gin.HandlerFunc {
 		// 解析 JWT Token
 		username, err := token.ParseRequest(c)
 		if err != nil {
+			fmt.Println("error: ", err)
 			core.WriteResponse(c, errno.ErrTokenInvalid, nil)
 			c.Abort()
 

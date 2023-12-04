@@ -111,5 +111,5 @@ func (b *userBiz) Login(ctx context.Context, r *v1.LoginRequest) (*v1.LoginRespo
 		return nil, errno.ErrSignToken
 	}
 
-	return &v1.LoginResponse{Token: "Bearer " + t}, nil
+	return &v1.LoginResponse{Token: t}, nil
 }

@@ -65,6 +65,7 @@ func Parse(tokenString string, key string) (string, error) {
 func ParseRequest(c *gin.Context) (string, error) {
 	header := c.Request.Header.Get("Authorization")
 
+	fmt.Println("header: ", header)
 	if len(header) == 0 {
 		return "", ErrMissingHeader
 	}

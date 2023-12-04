@@ -3,6 +3,7 @@ package miniblog
 import (
 	"github.com/gin-gonic/gin"
 
+	"github.com/Forest-211/miniblog/internal/miniblog/controller/v1/post"
 	"github.com/Forest-211/miniblog/internal/miniblog/controller/v1/user"
 	"github.com/Forest-211/miniblog/internal/miniblog/store"
 	"github.com/Forest-211/miniblog/internal/pkg/core"
@@ -31,6 +32,7 @@ func installRouters(g *gin.Engine) error {
 	}
 
 	uc := user.New(store.S, authz)
+	pc := post.New(store.S, authz)
 
 	// login
 	g.POST("/login", uc.Login)
@@ -48,6 +50,17 @@ func installRouters(g *gin.Engine) error {
 			users.PUT(":name", uc.Update)                         // 更新用户
 			users.GET("", uc.List)                                // 获取用户
 			users.DELETE(":name", uc.Delete)                      // 删除用户
+		}
+
+		// 创建 posts 路由组
+		posts := v1.Group("/posts")
+		{
+			posts.Use(mw.Authn())
+			posts.POST("/", pc.Create)     // 创建文章
+			posts.PUT(":id", pc.Update)    // 更新文章
+			posts.GET(":id", pc.Get)       // 获取文章
+			posts.GET("", pc.List)         // 获取文章
+			posts.DELETE(":id", pc.Delete) // 删除文章
 		}
 	}
 
