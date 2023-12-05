@@ -10,14 +10,15 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
 	"github.com/Forest-211/miniblog/internal/pkg/known"
 	"github.com/Forest-211/miniblog/internal/pkg/log"
 	"github.com/Forest-211/miniblog/internal/pkg/middleware"
 	"github.com/Forest-211/miniblog/pkg/token"
 	"github.com/Forest-211/miniblog/pkg/version/verflag"
-	"github.com/gin-gonic/gin"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var cfgFile string
