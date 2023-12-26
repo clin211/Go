@@ -14,6 +14,8 @@ import (
 
 type PostBiz interface {
 	Create(ctx context.Context, r *v1.CreatePostRequest) error
+	Get(ctx context.Context, r *v1.PostByIDRequest) (*model.PostM, error)
+	List(ctx context.Context, r *v1.ListPostRequest) ([]*model.PostM, error)
 }
 
 type postBiz struct {
@@ -37,4 +39,20 @@ func (p *postBiz) Create(ctx context.Context, r *v1.CreatePostRequest) error {
 		return err
 	}
 	return nil
+}
+
+func (p *postBiz) Get(ctx context.Context, r *v1.PostByIDRequest) (*model.PostM, error) {
+	post, err := p.ds.Posts().Get(ctx, r.ID)
+	if err != nil {
+		return nil, err
+	}
+	return post, nil
+}
+
+func (p *postBiz) List(ctx context.Context, r *v1.ListPostRequest) ([]*model.PostM, error) {
+	posts, err := p.ds.Posts().List(ctx, r.Username)
+	if err != nil {
+		return nil, err
+	}
+	return posts, nil
 }
