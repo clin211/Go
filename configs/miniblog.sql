@@ -61,17 +61,20 @@ CREATE TABLE `user` (
   `nickname` varchar(30) NOT NULL COMMENT '昵称',
   `email` varchar(256) NOT NULL COMMENT '电子邮件地址',
   `phone` varchar(16) NOT NULL COMMENT '手机号码',
+  `status` int(1) DEFAULT 1 COMMENT '账户是否可用: 1:可用，0:不可用',
+  `isAdmin` tinyint(1) unsigned NOT NULL DEFAULT 0 COMMENT '是否是超集管理员: 1: administrator\\\\n0: non-administrator',
+  `lastLoginAt` timestamp NULL DEFAULT NULL COMMENT '最后一次登录时间',
   `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=MyISAM AUTO_INCREMENT=28 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of user
 -- ----------------------------
 BEGIN;
-INSERT INTO `user` VALUES (27, 'forest', '123456', 'forest', '767425412@qq.com', '1234567890', '2023-11-14 09:08:08', '2023-11-14 09:08:08');
+INSERT INTO `user` VALUES (NULL, 'changlin', '123456', 'forest', '767425412@qq.com', '1234567890', 1, 1, NULL, NOW(), NOW());
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;

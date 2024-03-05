@@ -1,4 +1,4 @@
-package db
+package mysql
 
 import (
 	"fmt"
@@ -23,13 +23,12 @@ type MySQLOptions struct {
 
 // DSN 从 MySQLOptions 返回 DSN.
 func (o *MySQLOptions) DSN() string {
-	return fmt.Sprintf(`%s:%s@tcp(%s)/%s?charset=utf8&parseTime=%t&loc=%s`,
+	return fmt.Sprintf(`%s:%s@tcp(127.0.0.1:11006)/%s?charset=utf8mb4&parseTime=True&loc=Local`,
 		o.Username,
-		o.Password,
+		// o.Password,
 		o.Host,
 		o.Database,
-		true,
-		"Local")
+	)
 }
 
 // NewMySQL 使用给定的选项创建一个新的 gorm 数据库实例.
@@ -42,6 +41,7 @@ func NewMySQL(opts *MySQLOptions) (*gorm.DB, error) {
 		Logger: logger.Default.LogMode(logLevel),
 	})
 	if err != nil {
+		fmt.Println("failed to connect: ", err)
 		return nil, err
 	}
 

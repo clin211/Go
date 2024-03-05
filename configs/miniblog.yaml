@@ -5,7 +5,7 @@ jwt-secret: <euqa82A~~l-I+g7H%hl?7o"0m^rI2]xqa#g8mdI&9G7u1M<cAr|<7N_~7zc}.X     
 
 # MySQL 数据库相关配置
 db:
-  host: 127.0.0.1:11006                                                         # MySQL 机器 IP 和端口，默认 127.0.0.1:3306
+  host: localhost:11006                                                         # MySQL 机器 IP 和端口，默认 127.0.0.1:3306
   username: root                                                                # MySQL 用户名(建议授权最小权限集)
   password: 123456                                                              # MySQL 用户密码
   database: miniblog                                                            # miniblog 系统所用的数据库名
