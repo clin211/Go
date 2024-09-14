@@ -1,5 +1,5 @@
-Server: 
-  RunMode: debug
+Server:
+  RunMode: release # release OR debug
   HttpPort: 9090
   ReadTimeout: 60
   WriteTimeout: 60
@@ -13,9 +13,9 @@ Database:
   DBType: mysql
   Username: root
   Password: 123456
-  Host: 119.3.48.150:12306
-  DBName: blog_service
-  TablePrefix: blog_
+  Host: 39.104.202.63:11006
+  DBName: service
+  TablePrefix:
   Charset: utf8
   ParseTime: true
   MaxIdleConns: 10

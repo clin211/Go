@@ -1,13 +1,22 @@
 package v1
 
 import (
+	"blog-service/internal/model"
 	"blog-service/pkg/app"
 	"blog-service/pkg/errcode"
 
 	"github.com/gin-gonic/gin"
 )
 
-type Article struct{}
+type Article struct {
+	ID             uint32     `json:"id"`
+	Title          string     `json:"title"`
+	Desc           string     `json:"desc"`
+	Content        string     `json:"content"`
+	ConverImageUrl string     `json:"conver_image_url"`
+	State          uint8      `json:"state"`
+	Tag            *model.Tag `json:"tag"`
+}
 
 func NewArticle() Article {
 	return Article{}
@@ -35,7 +44,7 @@ func (a Article) Get(c *gin.Context) {
 // @Failure 400 {object} errcode.Error "请求错误"
 // @Failure 500 {object} errcode.Error "内部错误"
 // @Router /api/v1/articles [get]
-func (a Article) List(c *gin.Context)   {}
+func (a Article) List(c *gin.Context) {}
 
 // @Summary 创建文章
 // @Produce json
@@ -73,4 +82,4 @@ func (a Article) Update(c *gin.Context) {}
 // @Failure 400 {object} errcode.Error "请求错误"
 // @Failure 500 {object} errcode.Error "内部错误"
 // @Router /api/v1/articles/{id} [delete]
-func (a Article) Detele(c *gin.Context) {}
+func (a Article) Delete(c *gin.Context) {}

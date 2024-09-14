@@ -13,7 +13,7 @@ type Tag struct {
 }
 
 func (a Tag) TableName() string {
-	return "blog_tag"
+	return "tag"
 }
 
 type TagSwagger struct {
@@ -54,6 +54,16 @@ func (t Tag) List(db *gorm.DB, pageOffset, pageSize int) ([]*Tag, error) {
 		return nil, err
 	}
 	return tags, nil
+}
+
+func (t Tag) Get(db *gorm.DB) (Tag, error) {
+	var tag Tag
+	err := db.Where("id = ? AND is_del = ? AND state = ?", t.ID, 0, t.State).First(&tag).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return tag, err
+	}
+
+	return tag, nil
 }
 
 // 创建数据
