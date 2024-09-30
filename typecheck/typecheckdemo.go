@@ -10,3 +10,7 @@ func check() {
 func unused() {
 	i := 1
 }
+
+func types() {
+	fmt.Println("Hello, World!")
+}

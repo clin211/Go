@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 func main() {
 	s1 := "this is a string"
@@ -17,4 +20,5 @@ func main() {
 		}()
 	}
 
+	time.Sleep(1000 * time.Millisecond)
 }
