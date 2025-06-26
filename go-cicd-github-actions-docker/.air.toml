@@ -1,0 +1,54 @@
+# [Air](https://github.com/cosmtrek/air) 配置文件
+
+# 工作目录
+# 使用 . 或绝对路径，请注意 $GOPATH 的配置
+root = "."
+tmp_dir = "tmp"
+
+[build]
+# 只需要监听 go 文件的变化
+include_ext = ["go", "yaml", "yml", "json"]
+# 忽略这些文件扩展名或目录
+exclude_dir = [
+  "tmp",
+  "vendor",
+  "build",
+  "docs",
+  ".git",
+  ".github",
+  "deployments",
+]
+# 监听以下指定目录的文件
+include_dir = ["cmd", "internal", "pkg", "configs"]
+# 排除以下文件
+exclude_file = []
+# 如果文件更改过于频繁，则没有必要在每次更改时都重新构建。
+delay = 500 # ms
+# 构建前执行的命令
+cmd = "go build -o ./tmp/main ./cmd/server/main.go"
+# 二进制文件的路径
+bin = "./tmp/main"
+# 自定义的二进制，可以添加额外的编译标识
+full_bin = "APP_ENV=development ./tmp/main"
+# 监听文件变化后，执行的命令
+log = "air_errors.log"
+# 需要执行的构建命令
+build_args = []
+
+[log]
+# 显示日志
+time = true
+# 设置日志颜色
+color = true
+
+[color]
+# 自定义每个部分显示的颜色
+main = "magenta"
+watcher = "cyan"
+build = "yellow"
+runner = "green"
+app = "white"
+
+[misc]
+# 退出时是否删除tmp目录
+clean_on_exit = true

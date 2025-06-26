@@ -1,0 +1,31 @@
+# 编译生成的文件和目录
+/build/
+/bin/
+/tmp/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# 测试生成的文件
+*.test
+*.out
+coverage.out
+coverage.html
+
+# IDE 相关文件
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# 项目特定文件
+.env
+/vendor/
+/air_errors.log
+.dbdata/
+
+# 日志文件
+*.log

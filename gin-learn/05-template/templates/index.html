@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}}</title>
+</head>
+
+<body>
+    <h2>this is home page</h2>
+    <h4>username: {{.username}}</h4>
+
+    {{ if .IsAdmin }}
+    <button>管理面板</button>
+    {{ else if .IsSignin }}
+    <button>个人中心</button>
+    {{ else }}
+    <button>登录</button>
+    {{ end }}
+    {{/* 这是单行注释 */}}
+
+    {{/*
+    多行注释
+    不会被渲染到输出
+    */}}
+
+    <!-- 循环遍历 -->
+    {{ if .skills }}
+    <h3>skills:</h3>
+    <ul>
+        {{ range $index, $item := .skills }}
+        <li class="item-{{ $index }}">{{ $item }}</li>
+        {{ end }}
+    </ul>
+    {{ else }}
+    <p>暂无技能</p> {{/* 修正文字错误 */}}
+    {{ end }}
+
+    <!-- 变量声明 -->
+    {{$length := len .skills }}
+    <p>技能总数: {{ $length }}</p>
+
+    <!-- 函数调用 -->
+    <time>{{formatDate .date}}</time>
+    <p>{{.content}}</p>
+
+
+    {{- /*
+    No extra space or newlines here
+    */ -}}
+    <p>{{ .content }}</p>
+
+    <h1>数学运算</h1>
+    <p>数组：{{ .numbers }}</p>
+    <p>求和：{{ add .numbers }}</p>
+    <p>最大值：{{ max .numbers }}</p>
+    <p>最小值：{{ min .numbers }}</p>
+
+    <h1>字符串操作</h1>
+    <p>单词：{{ .word }}</p>
+    <p>是否包含 "hello"：{{ contains .words "hello" }}</p>
+    <p>是否包含 "gin"：{{ contains .words "gin" }}</p>
+    <p>是否包含 "go"：{{ contains .words "go" }}</p>
+</body>
+
+</html>

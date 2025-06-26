@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # 文件上传服务
+  upload-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: file-upload-service
+    ports:
+      - "8080:8080"
+    volumes:
+      # 持久化数据卷
+      - upload_data:/root/uploads
+      - temp_chunks:/root/temp_chunks
+    restart: unless-stopped
+    networks:
+      - upload-network
+    environment:
+      - GIN_MODE=release
+
+  # 开发环境 - 使用热加载
+  upload-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: file-upload-dev
+    ports:
+      - "8081:8080"
+    volumes:
+      # 挂载源代码目录
+      - .:/app
+      - upload_data_dev:/app/uploads
+      - temp_chunks_dev:/app/temp_chunks
+    restart: unless-stopped
+    networks:
+      - upload-network
+    environment:
+      - GIN_MODE=debug
+    command: air
+
+# 网络配置
+networks:
+  upload-network:
+    driver: bridge
+
+# 数据卷
+volumes:
+  upload_data:
+    driver: local
+  temp_chunks:
+    driver: local
+  upload_data_dev:
+    driver: local
+  temp_chunks_dev:
+    driver: local

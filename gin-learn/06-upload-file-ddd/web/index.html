@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DDD文件上传系统</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Heroicons -->
+  <script src="https://unpkg.com/@heroicons/vue@1.0.4/dist/heroicons.js"></script>
+  <!-- 自定义样式 -->
+  <style>
+    .drop-zone {
+      border: 2px dashed #4f46e5;
+      transition: all 0.3s ease;
+    }
+
+    .drop-zone.active {
+      background-color: #eef2ff;
+      border-color: #6366f1;
+    }
+
+    .progress-ring__circle {
+      transition: stroke-dashoffset 0.5s;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+  <!-- 页面头部 -->
+  <header class="bg-indigo-600 text-white shadow-md">
+    <div class="container mx-auto px-4 py-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <h1 class="text-3xl font-bold">文件上传</h1>
+          <p class="mt-1 text-indigo-200">基于领域驱动设计的文件上传解决方案</p>
+        </div>
+        <div class="hidden md:block">
+          <div class="flex space-x-4 text-sm">
+            <a href="#single-upload" class="bg-indigo-700 px-3 py-2 rounded-md">单文件上传</a>
+            <a href="#multiple-upload" class="hover:bg-indigo-700 px-3 py-2 rounded-md">多文件上传</a>
+            <a href="#folder-upload" class="hover:bg-indigo-700 px-3 py-2 rounded-md">文件夹上传</a>
+            <a href="#chunk-upload" class="hover:bg-indigo-700 px-3 py-2 rounded-md">分片上传</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主要内容容器 -->
+  <main class="container mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+      <!-- 单文件上传面板 -->
+      <section id="single-upload" class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-indigo-500 text-white px-6 py-4">
+          <h2 class="text-xl font-semibold flex items-center">
+            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+            </svg>
+            单文件上传
+          </h2>
+        </div>
+
+        <div class="p-6">
+          <div id="single-drop-zone"
+            class="drop-zone flex flex-col items-center justify-center p-8 rounded-lg cursor-pointer mb-4">
+            <svg class="w-12 h-12 text-indigo-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+            </svg>
+            <p class="text-indigo-600 font-medium">拖放文件至此处或点击选择</p>
+            <p class="text-gray-500 text-sm mt-1">支持所有类型文件</p>
+            <input type="file" id="single-file-input" class="hidden" />
+          </div>
+
+          <div class="mt-4">
+            <button id="single-upload-btn"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md w-full transition">
+              上传文件
+            </button>
+          </div>
+
+          <!-- 上传进度显示 -->
+          <div id="single-progress-container" class="mt-4 hidden">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-sm font-medium text-indigo-600" id="single-progress-text">0%</span>
+              <div class="flex items-center">
+                <svg class="w-4 h-4 text-indigo-600 animate-spin mr-1" id="single-loading-icon" fill="none"
+                  viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                  </path>
+                </svg>
+                <span class="text-sm text-gray-500" id="single-file-size">0 KB</span>
+              </div>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-indigo-600 h-2 rounded-full" id="single-progress-bar" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- 上传结果 -->
+          <div id="single-result-container" class="mt-4 hidden">
+            <div class="bg-green-50 border border-green-200 rounded-md p-4">
+              <div class="flex">
+                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <div>
+                  <h3 class="text-sm font-medium text-green-800">上传成功</h3>
+                  <div class="mt-2 text-sm text-green-700">
+                    <p id="single-result-url"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 上传错误 -->
+          <div id="single-error-container" class="mt-4 hidden">
+            <div class="bg-red-50 border border-red-200 rounded-md p-4">
+              <div class="flex">
+                <svg class="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                <div>
+                  <h3 class="text-sm font-medium text-red-800">上传失败</h3>
+                  <div class="mt-2 text-sm text-red-700">
+                    <p id="single-error-message"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 多文件上传面板 -->
+      <section id="multiple-upload" class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-purple-500 text-white px-6 py-4">
+          <h2 class="text-xl font-semibold flex items-center">
+            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+              </path>
+            </svg>
+            多文件上传
+          </h2>
+        </div>
+
+        <div class="p-6">
+          <div id="multiple-drop-zone"
+            class="drop-zone flex flex-col items-center justify-center p-8 rounded-lg cursor-pointer mb-4">
+            <svg class="w-12 h-12 text-purple-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+              </path>
+            </svg>
+            <p class="text-purple-600 font-medium">拖放多个文件至此处或点击选择</p>
+            <p class="text-gray-500 text-sm mt-1">可一次选择多个文件</p>
+            <input type="file" id="multiple-file-input" multiple class="hidden" />
+          </div>
+
+          <div class="mt-4">
+            <button id="multiple-upload-btn"
+              class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md w-full transition">
+              上传多个文件
+            </button>
+          </div>
+
+          <!-- 选中文件列表 -->
+          <div id="multiple-files-list" class="mt-4 hidden">
+            <h3 class="text-sm font-semibold text-gray-700 mb-2">已选择的文件</h3>
+            <div id="multiple-files-container" class="space-y-2 max-h-40 overflow-y-auto"></div>
+          </div>
+
+          <!-- 上传进度显示 -->
+          <div id="multiple-progress-container" class="mt-4 hidden">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-sm font-medium text-purple-600" id="multiple-progress-text">0%</span>
+              <div class="flex items-center">
+                <svg class="w-4 h-4 text-purple-600 animate-spin mr-1" id="multiple-loading-icon" fill="none"
+                  viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                  </path>
+                </svg>
+                <span class="text-sm text-gray-500" id="multiple-total-size">0 KB</span>
+              </div>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-purple-600 h-2 rounded-full" id="multiple-progress-bar" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- 上传结果 -->
+          <div id="multiple-result-container" class="mt-4 hidden">
+            <div class="bg-green-50 border border-green-200 rounded-md p-4">
+              <div class="flex">
+                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <div>
+                  <h3 class="text-sm font-medium text-green-800">上传成功</h3>
+                  <div class="mt-2 text-sm text-green-700">
+                    <p id="multiple-result-message"></p>
+                    <ul id="multiple-result-files" class="list-disc pl-5 mt-1 space-y-1"></ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 上传错误 -->
+          <div id="multiple-error-container" class="mt-4 hidden">
+            <div class="bg-red-50 border border-red-200 rounded-md p-4">
+              <div class="flex">
+                <svg class="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                <div>
+                  <h3 class="text-sm font-medium text-red-800">上传失败</h3>
+                  <div class="mt-2 text-sm text-red-700">
+                    <p id="multiple-error-message"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 文件夹上传面板 -->
+      <section id="folder-upload" class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-teal-500 text-white px-6 py-4">
+          <h2 class="text-xl font-semibold">文件夹上传</h2>
+        </div>
+
+        <div class="p-6">
+          <div class="text-center py-4">
+            <svg class="w-12 h-12 text-teal-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+            </svg>
+            <p class="text-teal-600 font-medium">选择文件夹上传</p>
+            <p class="text-gray-500 text-sm mt-1">将保留目录结构</p>
+          </div>
+
+          <div class="mt-4">
+            <button id="folder-select-btn"
+              class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md w-full transition">
+              选择文件夹
+            </button>
+            <input type="file" id="folder-input" webkitdirectory directory multiple class="hidden" />
+          </div>
+
+          <!-- 文件夹信息 -->
+          <div id="folder-info-container" class="mt-4 hidden">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-semibold text-gray-700">已选择的文件夹</h3>
+              <span class="text-sm text-gray-500" id="folder-file-count">0 个文件</span>
+            </div>
+            <div class="mt-2 p-3 bg-gray-50 rounded-md">
+              <p id="folder-name" class="text-sm text-gray-800 font-medium"></p>
+              <p id="folder-size" class="text-xs text-gray-500 mt-1"></p>
+            </div>
+
+            <button id="folder-upload-btn"
+              class="mt-4 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md w-full transition hidden">
+              上传文件夹
+            </button>
+          </div>
+
+          <!-- 上传进度显示 -->
+          <div id="folder-progress-container" class="mt-4 hidden">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-sm font-medium text-teal-600" id="folder-progress-text">0%</span>
+              <span class="text-sm text-gray-500" id="folder-upload-size">0 KB</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-teal-600 h-2 rounded-full" id="folder-progress-bar" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- 上传结果 -->
+          <div id="folder-result-container" class="mt-4 hidden">
+            <div class="bg-green-50 border border-green-200 rounded-md p-4">
+              <div class="flex">
+                <div>
+                  <h3 class="text-sm font-medium text-green-800">上传成功</h3>
+                  <div class="mt-2 text-sm text-green-700">
+                    <p id="folder-result-message"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 上传错误 -->
+          <div id="folder-error-container" class="mt-4 hidden">
+            <div class="bg-red-50 border border-red-200 rounded-md p-4">
+              <div class="flex">
+                <div>
+                  <h3 class="text-sm font-medium text-red-800">上传失败</h3>
+                  <div class="mt-2 text-sm text-red-700">
+                    <p id="folder-error-message"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 分片上传面板 -->
+      <section id="chunk-upload" class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-amber-500 text-white px-6 py-4">
+          <h2 class="text-xl font-semibold">分片上传</h2>
+        </div>
+
+        <div class="p-6">
+          <div id="chunk-drop-zone"
+            class="drop-zone flex flex-col items-center justify-center p-8 rounded-lg cursor-pointer mb-4"
+            style="border-color: #f59e0b;">
+            <svg class="w-12 h-12 text-amber-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+              </path>
+            </svg>
+            <p class="text-amber-600 font-medium">拖放大文件至此处或点击选择</p>
+            <p class="text-gray-500 text-sm mt-1">适用于大文件上传，将自动分片处理</p>
+            <input type="file" id="chunk-file-input" class="hidden" />
+          </div>
+
+          <div class="p-3 bg-amber-50 border border-amber-200 rounded-md">
+            <div class="flex items-center">
+              <svg class="w-5 h-5 text-amber-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <p class="text-sm text-amber-700">分片大小设置</p>
+            </div>
+            <div class="mt-2">
+              <select id="chunk-size" class="w-full p-2 border border-amber-300 rounded-md text-sm">
+                <option value="1048576">1 MB</option>
+                <option value="5242880" selected>5 MB</option>
+                <option value="10485760">10 MB</option>
+                <option value="20971520">20 MB</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <button id="chunk-upload-btn"
+              class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-md w-full transition">
+              上传大文件
+            </button>
+          </div>
+
+          <!-- 分片上传进度 -->
+          <div id="chunk-progress-container" class="mt-4 hidden">
+            <div class="space-y-3">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-sm font-medium text-amber-600">总进度</span>
+                  <span class="text-sm text-gray-500" id="chunk-total-progress">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                  <div class="bg-amber-600 h-2 rounded-full" id="chunk-total-progress-bar" style="width: 0%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-sm font-medium text-amber-600">当前分片</span>
+                  <span class="text-sm text-gray-500" id="chunk-current-info">0/0</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                  <div class="bg-amber-500 h-2 rounded-full" id="chunk-current-progress-bar" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 上传结果 -->
+          <div id="chunk-result-container" class="mt-4 hidden">
+            <div class="bg-green-50 border border-green-200 rounded-md p-4">
+              <div class="flex">
+                <div>
+                  <h3 class="text-sm font-medium text-green-800">上传成功</h3>
+                  <div class="mt-2 text-sm text-green-700">
+                    <p id="chunk-result-message"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 上传错误 -->
+          <div id="chunk-error-container" class="mt-4 hidden">
+            <div class="bg-red-50 border border-red-200 rounded-md p-4">
+              <div class="flex">
+                <div>
+                  <h3 class="text-sm font-medium text-red-800">上传失败</h3>
+                  <div class="mt-2 text-sm text-red-700">
+                    <p id="chunk-error-message"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- JavaScript -->
+  <script>
+    // 辅助函数
+    function formatFileSize (bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function showElement (id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function hideElement (id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function resetElement (id) {
+      hideElement(id);
+      if (id.endsWith('-progress-container')) {
+        const progressBar = document.getElementById(id.replace('-container', '-bar'));
+        if (progressBar) progressBar.style.width = '0%';
+      }
+    }
+
+    function setUploadProgress (prefix, percent) {
+      const progressBar = document.getElementById(`${prefix}-progress-bar`);
+      const progressText = document.getElementById(`${prefix}-progress-text`);
+
+      if (progressBar) progressBar.style.width = `${percent}%`;
+      if (progressText) progressText.textContent = `${percent}%`;
+    }
+
+    function showSuccess (prefix, message) {
+      resetElement(`${prefix}-progress-container`);
+      hideElement(`${prefix}-error-container`);
+
+      const resultMessage = document.getElementById(`${prefix}-result-message`);
+      if (resultMessage) resultMessage.textContent = message;
+
+      showElement(`${prefix}-result-container`);
+    }
+
+    function showError (prefix, message) {
+      resetElement(`${prefix}-progress-container`);
+      hideElement(`${prefix}-result-container`);
+
+      const errorMessage = document.getElementById(`${prefix}-error-message`);
+      if (errorMessage) errorMessage.textContent = message;
+
+      showElement(`${prefix}-error-container`);
+    }
+
+    // 设置拖放区域
+    function setupDropZone (dropZoneId, inputId) {
+      const dropZone = document.getElementById(dropZoneId);
+      const input = document.getElementById(inputId);
+
+      if (!dropZone || !input) return;
+
+      // 点击选择文件
+      dropZone.addEventListener('click', () => {
+        input.click();
+      });
+
+      // 拖放处理
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        });
+      });
+
+      // 拖拽样式变化
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+          dropZone.classList.add('active');
+        });
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+          dropZone.classList.remove('active');
+        });
+      });
+
+      // 文件拖放处理
+      dropZone.addEventListener('drop', (e) => {
+        if (inputId === 'single-file-input') {
+          if (e.dataTransfer.files.length > 0) {
+            input.files = e.dataTransfer.files;
+            handleFileSelection(input.files[0], 'single');
+          }
+        } else if (inputId === 'multiple-file-input') {
+          if (e.dataTransfer.files.length > 0) {
+            input.files = e.dataTransfer.files;
+            handleMultipleFileSelection(input.files);
+          }
+        } else if (inputId === 'chunk-file-input') {
+          if (e.dataTransfer.files.length > 0) {
+            input.files = e.dataTransfer.files;
+            handleChunkFileSelection(input.files[0]);
+          }
+        }
+      });
+    }
+
+    // 单文件上传处理
+    function handleFileSelection (file, prefix) {
+      if (!file) return;
+
+      // 显示文件大小
+      const fileSizeEl = document.getElementById(`${prefix}-file-size`);
+      if (fileSizeEl) fileSizeEl.textContent = formatFileSize(file.size);
+
+      // 显示进度容器
+      showElement(`${prefix}-progress-container`);
+
+      // 重置进度条
+      setUploadProgress(prefix, 0);
+
+      return file;
+    }
+
+    // 单文件上传实现
+    function uploadSingleFile (file) {
+      if (!file) return;
+
+      // 重置状态
+      resetElement('single-result-container');
+      resetElement('single-error-container');
+      showElement('single-progress-container');
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/upload/single', true);
+
+      xhr.upload.onprogress = function (e) {
+        if (e.lengthComputable) {
+          const progress = Math.round((e.loaded / e.total) * 100);
+          setUploadProgress('single', progress);
+        }
+      };
+
+      xhr.onload = function () {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const response = JSON.parse(xhr.responseText);
+          if (response.data && response.data.file) {
+            const file = response.data.file;
+            const resultUrl = document.getElementById('single-result-url');
+            if (resultUrl) {
+              resultUrl.innerHTML = `文件名: ${file.name}<br>
+                                    大小: ${formatFileSize(file.size)}<br>
+                                    访问地址: <a href="${file.url}" target="_blank" class="text-blue-600 hover:underline">${file.url}</a>`;
+            }
+          }
+          showSuccess('single', '文件上传成功！');
+        } else {
+          showError('single', `上传失败，HTTP状态码: ${xhr.status}`);
+        }
+      };
+
+      xhr.onerror = function () {
+        showError('single', '网络错误导致上传失败');
+      };
+
+      xhr.send(formData);
+    }
+
+    // 多文件上传处理
+    function handleMultipleFileSelection (files) {
+      if (!files || files.length === 0) return;
+
+      const filesContainer = document.getElementById('multiple-files-container');
+      filesContainer.innerHTML = '';
+
+      let totalSize = 0;
+
+      Array.from(files).forEach((file, index) => {
+        totalSize += file.size;
+
+        const fileItem = document.createElement('div');
+        fileItem.className = 'flex justify-between items-center text-sm p-2 bg-gray-50 rounded-md';
+        fileItem.innerHTML = `
+                <div class="flex items-center">
+                    <span class="w-6 h-6 flex items-center justify-center rounded-full bg-purple-100 text-purple-600 mr-2">
+                        ${index + 1}
+                    </span>
+                    <span class="truncate" style="max-width: 160px;">${file.name}</span>
+                </div>
+                <span class="text-gray-500">${formatFileSize(file.size)}</span>
+            `;
+
+        filesContainer.appendChild(fileItem);
+      });
+
+      // 显示文件列表和总大小
+      const totalSizeEl = document.getElementById('multiple-total-size');
+      if (totalSizeEl) totalSizeEl.textContent = formatFileSize(totalSize);
+
+      showElement('multiple-files-list');
+
+      return files;
+    }
+
+    // 多文件上传实现
+    function uploadMultipleFiles (files) {
+      if (!files || files.length === 0) return;
+
+      // 重置状态
+      resetElement('multiple-result-container');
+      resetElement('multiple-error-container');
+      showElement('multiple-progress-container');
+
+      const formData = new FormData();
+      Array.from(files).forEach(file => {
+        formData.append('files', file);
+      });
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/upload/multiple', true);
+
+      xhr.upload.onprogress = function (e) {
+        if (e.lengthComputable) {
+          const progress = Math.round((e.loaded / e.total) * 100);
+          setUploadProgress('multiple', progress);
+        }
+      };
+
+      xhr.onload = function () {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const response = JSON.parse(xhr.responseText);
+          // 显示上传成功的文件列表
+          const resultMessage = document.getElementById('multiple-result-message');
+          const resultFiles = document.getElementById('multiple-result-files');
+
+          if (resultMessage && resultFiles) {
+            resultFiles.innerHTML = '';
+
+            if (response.data && response.data.files) {
+              resultMessage.textContent = `成功上传 ${response.data.files.length} 个文件！`;
+
+              response.data.files.forEach(file => {
+                const li = document.createElement('li');
+                li.innerHTML = `${file.name} (${formatFileSize(file.size)}) - <a href="${file.url}" target="_blank" class="text-blue-600 hover:underline">查看</a>`;
+                resultFiles.appendChild(li);
+              });
+            }
+          }
+
+          showSuccess('multiple', '多文件上传成功！');
+        } else {
+          showError('multiple', `上传失败，HTTP状态码: ${xhr.status}`);
+        }
+      };
+
+      xhr.onerror = function () {
+        showError('multiple', '网络错误导致上传失败');
+      };
+
+      xhr.send(formData);
+    }
+
+    // 文件夹上传处理
+    function handleFolderSelection (files) {
+      if (!files || files.length === 0) return;
+
+      // 显示文件夹信息
+      const folderName = files[0].webkitRelativePath.split('/')[0];
+      const folderNameEl = document.getElementById('folder-name');
+      const folderSizeEl = document.getElementById('folder-size');
+      const folderFileCountEl = document.getElementById('folder-file-count');
+
+      if (folderNameEl) folderNameEl.textContent = folderName;
+
+      let totalSize = 0;
+      Array.from(files).forEach(file => {
+        totalSize += file.size;
+      });
+
+      if (folderSizeEl) folderSizeEl.textContent = formatFileSize(totalSize);
+      if (folderFileCountEl) folderFileCountEl.textContent = `${files.length} 个文件`;
+
+      // 显示文件夹信息和上传按钮
+      showElement('folder-info-container');
+      document.getElementById('folder-upload-btn').classList.remove('hidden');
+
+      return files;
+    }
+
+    // 文件夹上传实现
+    function uploadFolder (files) {
+      if (!files || files.length === 0) return;
+
+      // 重置状态
+      resetElement('folder-result-container');
+      resetElement('folder-error-container');
+      showElement('folder-progress-container');
+
+      const formData = new FormData();
+      Array.from(files).forEach(file => {
+        // 使用相对路径作为文件名
+        formData.append('files', file);
+      });
+
+      // 获取文件夹名称
+      const folderName = files[0].webkitRelativePath.split('/')[0];
+      formData.append('folderName', folderName);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/upload/folder', true);
+
+      xhr.upload.onprogress = function (e) {
+        if (e.lengthComputable) {
+          const progress = Math.round((e.loaded / e.total) * 100);
+          setUploadProgress('folder', progress);
+          document.getElementById('folder-upload-size').textContent = formatFileSize(e.loaded) + ' / ' + formatFileSize(e.total);
+        }
+      };
+
+      xhr.onload = function () {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const response = JSON.parse(xhr.responseText);
+          const folderResultMessage = document.getElementById('folder-result-message');
+
+          if (folderResultMessage && response.data && response.data.folder) {
+            const folder = response.data.folder;
+            folderResultMessage.innerHTML = `
+              文件夹名称: ${folder.folderName}<br>
+              文件夹路径: ${folder.folderPath}<br>
+              包含文件数: ${folder.total}个<br>
+            `;
+          }
+
+          showSuccess('folder', `文件夹 "${folderName}" 上传成功！`);
+        } else {
+          showError('folder', `上传失败，HTTP状态码: ${xhr.status}`);
+        }
+      };
+
+      xhr.onerror = function () {
+        showError('folder', '网络错误导致上传失败');
+      };
+
+      xhr.send(formData);
+    }
+
+    // 分片上传处理
+    function handleChunkFileSelection (file) {
+      if (!file) return;
+
+      // 显示文件信息
+      const chunkFileInfo = document.getElementById('chunk-file-info');
+      if (chunkFileInfo) {
+        chunkFileInfo.innerHTML = `
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-sm font-medium text-amber-600">文件信息</span>
+          </div>
+          <div class="p-2 bg-amber-50 rounded-md">
+            <p class="text-sm text-amber-700">文件名: ${file.name}</p>
+            <p class="text-sm text-amber-700">大小: ${formatFileSize(file.size)}</p>
+          </div>
+        `;
+        showElement('chunk-file-info');
+      }
+
+      return file;
+    }
+
+    // 分片上传实现
+    function uploadChunkedFile (file) {
+      if (!file) return;
+
+      // 重置状态
+      resetElement('chunk-result-container');
+      resetElement('chunk-error-container');
+      showElement('chunk-progress-container');
+
+      const chunkSizeSelect = document.getElementById('chunk-size');
+      const chunkSize = parseInt(chunkSizeSelect.value);
+      const chunks = Math.ceil(file.size / chunkSize);
+
+      let uploadId = '';
+      let uploadedChunks = 0;
+
+      // 总进度更新函数
+      function updateTotalProgress () {
+        const progress = Math.round((uploadedChunks / chunks) * 100);
+        document.getElementById('chunk-total-progress-bar').style.width = progress + '%';
+        document.getElementById('chunk-total-progress').textContent = progress + '%';
+      }
+
+      // 当前分片进度更新函数
+      function updateCurrentProgress (chunkIndex, percent) {
+        document.getElementById('chunk-current-progress-bar').style.width = percent + '%';
+        document.getElementById('chunk-current-info').textContent = `分片 ${chunkIndex + 1}/${chunks}`;
+      }
+
+      // 1. 初始化分片上传
+      fetch('/upload/chunk/init', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fileName: file.name,
+          fileSize: file.size,
+          totalChunks: chunks,
+          mimeType: file.type
+        })
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`初始化分片上传失败，HTTP状态码: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          // 获取上传ID
+          if (data.data && data.data.upload_id) {
+            uploadId = data.data.upload_id;
+            console.log('获取上传ID成功:', uploadId);
+
+            // 开始上传分片
+            uploadNextChunk(0);
+          } else {
+            throw new Error('无法获取上传ID');
+          }
+        })
+        .catch(error => {
+          showError('chunk', error.message || '初始化分片上传失败');
+        });
+
+      // 2. 上传单个分片
+      function uploadNextChunk (index) {
+        if (index >= chunks) {
+          // 所有分片上传完成，请求合并
+          mergeChunks();
+          return;
+        }
+
+        // 计算当前分片的范围
+        const start = index * chunkSize;
+        const end = Math.min(file.size, start + chunkSize);
+        const chunkBlob = file.slice(start, end);
+
+        // 更新当前分片信息
+        updateCurrentProgress(index, 0);
+
+        const formData = new FormData();
+        formData.append('upload_id', uploadId);
+        formData.append('index', index);
+        formData.append('total', chunks);
+        formData.append('chunk', chunkBlob);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/upload/chunk', true);
+
+        xhr.upload.onprogress = function (e) {
+          if (e.lengthComputable) {
+            const progress = Math.round((e.loaded / e.total) * 100);
+            updateCurrentProgress(index, progress);
+          }
+        };
+
+        xhr.onload = function () {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            // 分片上传成功
+            uploadedChunks++;
+            updateTotalProgress();
+
+            // 上传下一个分片
+            uploadNextChunk(index + 1);
+          } else {
+            showError('chunk', `分片 ${index + 1} 上传失败，HTTP状态码: ${xhr.status}`);
+          }
+        };
+
+        xhr.onerror = function () {
+          showError('chunk', `分片 ${index + 1} 上传失败，网络错误`);
+        };
+
+        xhr.send(formData);
+      }
+
+      // 3. 合并分片
+      function mergeChunks () {
+        fetch('/upload/chunk/merge', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            upload_id: uploadId,
+            file_name: file.name,
+            total_chunks: chunks,
+            content_type: file.type
+          })
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`合并分片失败，HTTP状态码: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then(data => {
+            const chunkResultMessage = document.getElementById('chunk-result-message');
+            if (chunkResultMessage && data.data && data.data.file) {
+              const fileInfo = data.data.file;
+              chunkResultMessage.innerHTML = `
+              文件名: ${fileInfo.name}<br>
+              大小: ${formatFileSize(fileInfo.size)}<br>
+              访问地址: <a href="${fileInfo.url}" target="_blank" class="text-blue-600 hover:underline">${fileInfo.url}</a>
+            `;
+            }
+
+            showSuccess('chunk', '分片上传完成，文件已成功合并！');
+          })
+          .catch(error => {
+            showError('chunk', error.message || '合并分片失败');
+          });
+      }
+    }
+
+    // 事件监听设置
+    document.addEventListener('DOMContentLoaded', function () {
+      // 单文件上传
+      const singleFileInput = document.getElementById('single-file-input');
+      const singleUploadBtn = document.getElementById('single-upload-btn');
+      const singleDropZone = document.getElementById('single-drop-zone');
+      let selectedSingleFile = null;
+
+      // 点击拖放区域选择文件
+      singleDropZone.addEventListener('click', function () {
+        singleFileInput.click();
+      });
+
+      singleFileInput.addEventListener('change', function (e) {
+        if (e.target.files && e.target.files.length > 0) {
+          selectedSingleFile = handleFileSelection(e.target.files[0], 'single');
+        }
+      });
+
+      singleUploadBtn.addEventListener('click', function () {
+        if (selectedSingleFile) {
+          uploadSingleFile(selectedSingleFile);
+        } else {
+          showError('single', '请先选择文件');
+        }
+      });
+
+      // 多文件上传
+      const multipleFileInput = document.getElementById('multiple-file-input');
+      const multipleUploadBtn = document.getElementById('multiple-upload-btn');
+      let selectedMultipleFiles = null;
+
+      multipleFileInput.addEventListener('change', function (e) {
+        selectedMultipleFiles = handleMultipleFileSelection(e.target.files);
+      });
+
+      multipleUploadBtn.addEventListener('click', function () {
+        uploadMultipleFiles(selectedMultipleFiles);
+      });
+
+      // 文件夹上传
+      const folderInput = document.getElementById('folder-input');
+      const folderUploadBtn = document.getElementById('folder-upload-btn');
+      let selectedFolderFiles = null;
+
+      folderInput.addEventListener('change', function (e) {
+        selectedFolderFiles = handleFolderSelection(e.target.files);
+      });
+
+      folderUploadBtn.addEventListener('click', function () {
+        uploadFolder(selectedFolderFiles);
+      });
+
+      // 分片上传
+      const chunkFileInput = document.getElementById('chunk-file-input');
+      const chunkUploadBtn = document.getElementById('chunk-upload-btn');
+      let selectedChunkFile = null;
+
+      chunkFileInput.addEventListener('change', function (e) {
+        selectedChunkFile = handleChunkFileSelection(e.target.files[0]);
+      });
+
+      chunkUploadBtn.addEventListener('click', function () {
+        uploadChunkedFile(selectedChunkFile);
+      });
+
+      // 拖放功能
+      const dropZones = document.querySelectorAll('.drop-zone');
+
+      dropZones.forEach(zone => {
+        zone.addEventListener('dragover', function (e) {
+          e.preventDefault();
+          this.classList.add('border-purple-500');
+        });
+
+        zone.addEventListener('dragleave', function () {
+          this.classList.remove('border-purple-500');
+        });
+
+        zone.addEventListener('drop', function (e) {
+          e.preventDefault();
+          this.classList.remove('border-purple-500');
+
+          const files = e.dataTransfer.files;
+
+          if (this.id === 'single-drop-zone' && files.length > 0) {
+            selectedSingleFile = handleFileSelection(files[0], 'single');
+            singleFileInput.files = files;
+          } else if (this.id === 'multiple-drop-zone') {
+            selectedMultipleFiles = handleMultipleFileSelection(files);
+            // 无法直接设置multiple input的files
+          } else if (this.id === 'folder-drop-zone') {
+            // 拖放不支持文件夹，提示用户使用浏览按钮
+            alert('拖放不支持文件夹上传，请使用"选择文件夹"按钮。');
+          } else if (this.id === 'chunk-drop-zone' && files.length > 0) {
+            selectedChunkFile = handleChunkFileSelection(files[0]);
+            chunkFileInput.files = files;
+          }
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>

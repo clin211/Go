@@ -1,0 +1,268 @@
+basePath: /api/v1
+definitions:
+  model.UserCreate:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      username:
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - password
+    - username
+    type: object
+  model.UserResponse:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  model.UserUpdate:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+    type: object
+  user.SignInRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  user.SignInResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/model.UserResponse'
+    type: object
+host: localhost:18080
+info:
+  contact:
+    email: 767425412lin@gmail.com
+    name: clin
+  description: 使用 Github Actions 和 Docker 进行 CI/CD 的演示
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: 用于演示 CI/CD 的 API
+  version: "1.0"
+paths:
+  /auth/signin:
+    post:
+      consumes:
+      - application/json
+      description: 验证用户凭据并返回令牌
+      parameters:
+      - description: 用户凭据
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/user.SignInRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功登录，返回用户信息和令牌
+          schema:
+            $ref: '#/definitions/user.SignInResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: 认证失败
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 用户登录
+      tags:
+      - 认证
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: 创建新用户账号
+      parameters:
+      - description: 用户注册信息
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: 成功创建用户
+          schema:
+            $ref: '#/definitions/model.UserResponse'
+        "400":
+          description: 请求参数错误或用户已存在
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 用户注册
+      tags:
+      - 用户管理
+      - 认证
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: 获取系统中的所有用户列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回用户列表
+          schema:
+            items:
+              $ref: '#/definitions/model.UserResponse'
+            type: array
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 获取所有用户
+      tags:
+      - 用户管理
+  /users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 根据ID删除用户
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: 删除成功，无内容返回
+        "400":
+          description: 无效的用户ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: 用户不存在
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 删除用户
+      tags:
+      - 用户管理
+    get:
+      consumes:
+      - application/json
+      description: 根据用户ID获取用户详细信息
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回用户信息
+          schema:
+            $ref: '#/definitions/model.UserResponse'
+        "400":
+          description: 无效的用户ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: 用户不存在
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 获取单个用户
+      tags:
+      - 用户管理
+    put:
+      consumes:
+      - application/json
+      description: 根据ID更新用户信息
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 用户更新信息
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回更新后的用户信息
+          schema:
+            $ref: '#/definitions/model.UserResponse'
+        "400":
+          description: 请求参数错误或业务错误
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: 用户不存在
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 更新用户信息
+      tags:
+      - 用户管理
+swagger: "2.0"

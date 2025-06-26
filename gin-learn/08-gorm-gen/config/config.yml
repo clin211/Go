@@ -1,0 +1,9 @@
+app:
+  port: ":8080"
+  mode: "debug"
+mysql:
+  host: "localhost" # 数据库地址，如果使用 Docker，请使用 "db"
+  port: 3306 # 数据库端口
+  user: "gorm" # 数据库用户名
+  password: "gorm123456" # 数据库密码
+  dbname: "gormgen" # 数据库名称

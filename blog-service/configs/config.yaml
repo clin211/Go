@@ -1,0 +1,22 @@
+Server:
+  RunMode: release # release OR debug
+  HttpPort: 9090
+  ReadTimeout: 60
+  WriteTimeout: 60
+App:
+  DefaultPageSize: 10
+  MaxPageSize: 100
+  LogSevaPath: stoage/logs
+  LogFileName: app
+  logFileExt: .log
+Database:
+  DBType: mysql
+  Username: root
+  Password: 123456
+  Host: 39.104.202.63:11006
+  DBName: service
+  TablePrefix:
+  Charset: utf8
+  ParseTime: true
+  MaxIdleConns: 10
+  MaxOpenConns: 30

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>user</title>
+</head>
+<body>
+    <!-- <p>
+        <input type="text" placeholder="input username"> 
+        <input type="email" placeholder="input email">
+        <button>submit</button>
+    </p>
+
+    <script>
+        fetch.post('/form', {data: {
+            username: document.querySelector("type='text'").value.trim(),
+            email: document.querySelector("type='email'").value.trim()
+        }}).then(res => {
+            console.log('res"', res)
+        })
+    </script> -->
+    <form action="/add-user" method="post">
+        username: <input type="text" name="username"><br><br>
+        email: <input type="email" name="email"><br><br>
+        hobby <input type="text" name="hobby"><br><br>
+        <button type="submit">submit</button>
+    </form>
+    
+    <h3>数据绑定到结构体中</h3>
+    <form action="/add" method="post">
+        username: <input type="text" name="username"><br><br>
+        email: <input type="email" name="email"><br><br>
+        hobby <input type="text" name="hobby"><br><br>
+        <button type="submit">submit</button>
+    </form>
+</body>
+</html>

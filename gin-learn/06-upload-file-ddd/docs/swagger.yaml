@@ -1,0 +1,354 @@
+basePath: /
+definitions:
+  http.ChunkInitRequest:
+    properties:
+      fileName:
+        example: large-video.mp4
+        type: string
+      fileSize:
+        example: 104857600
+        type: integer
+      mimeType:
+        example: video/mp4
+        type: string
+      totalChunks:
+        example: 20
+        type: integer
+    type: object
+  http.ChunkInitResponse:
+    properties:
+      upload_id:
+        example: c0e0d7b1-9eb1-4c70-a9c5-69f7ca214285
+        type: string
+    type: object
+  http.ChunkMergeRequest:
+    properties:
+      content_type:
+        example: video/mp4
+        type: string
+      file_name:
+        example: large-video.mp4
+        type: string
+      total_chunks:
+        example: 20
+        type: integer
+      upload_id:
+        example: c0e0d7b1-9eb1-4c70-a9c5-69f7ca214285
+        type: string
+    type: object
+  http.ChunkMergeResponse:
+    properties:
+      file:
+        $ref: '#/definitions/http.FileResponse'
+    type: object
+  http.ChunkUploadResponse:
+    properties:
+      index:
+        example: 3
+        type: integer
+      total:
+        example: 20
+        type: integer
+      upload_id:
+        example: c0e0d7b1-9eb1-4c70-a9c5-69f7ca214285
+        type: string
+    type: object
+  http.FileResponse:
+    properties:
+      mimeType:
+        example: image/jpeg
+        type: string
+      name:
+        example: example.jpg
+        type: string
+      path:
+        example: /uploads/2023/04/example.jpg
+        type: string
+      size:
+        example: 1024000
+        type: integer
+      url:
+        example: http://localhost:8080/uploads/2023/04/example.jpg
+        type: string
+    type: object
+  http.FolderUploadResponse:
+    properties:
+      files:
+        items:
+          $ref: '#/definitions/http.FileResponse'
+        type: array
+      folderName:
+        example: my-project
+        type: string
+      folderPath:
+        example: /uploads/folders/my-project
+        type: string
+      total:
+        example: 3
+        type: integer
+    type: object
+  http.MultipleUploadResponse:
+    properties:
+      files:
+        items:
+          $ref: '#/definitions/http.FileResponse'
+        type: array
+      total:
+        example: 3
+        type: integer
+    type: object
+  http.SingleUploadResponse:
+    properties:
+      file:
+        $ref: '#/definitions/http.FileResponse'
+    type: object
+  response.Response:
+    properties:
+      code:
+        type: integer
+      data: {}
+      error:
+        type: string
+      message:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: 开发团队
+  description: 基于领域驱动设计的文件上传系统API，支持单文件上传、多文件上传、文件夹上传及大文件分片上传
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: 文件上传系统 API
+  version: "1.0"
+paths:
+  /upload/chunk:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 上传单个文件分片
+      parameters:
+      - description: 上传ID
+        in: formData
+        name: upload_id
+        required: true
+        type: string
+      - description: 分片索引，从0开始
+        in: formData
+        name: index
+        required: true
+        type: integer
+      - description: 总分片数
+        in: formData
+        name: total
+        required: true
+        type: integer
+      - description: 分片数据
+        in: formData
+        name: chunk
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 分片上传成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/http.ChunkUploadResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 上传文件分片
+      tags:
+      - 上传
+  /upload/chunk/init:
+    post:
+      consumes:
+      - application/json
+      description: 开始大文件分片上传前的初始化操作
+      parameters:
+      - description: 初始化参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/http.ChunkInitRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 初始化成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/http.ChunkInitResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 初始化分片上传
+      tags:
+      - 上传
+  /upload/folder:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 上传完整文件夹，保留目录结构
+      parameters:
+      - description: 要上传的文件夹中的文件
+        in: formData
+        name: files
+        required: true
+        type: file
+      - description: 文件夹名称
+        in: formData
+        name: folderName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 上传成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/http.FolderUploadResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 文件夹上传
+      tags:
+      - 上传
+  /upload/merge:
+    post:
+      consumes:
+      - application/json
+      description: 所有分片上传完成后，合并为完整文件
+      parameters:
+      - description: 合并参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/http.ChunkMergeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 合并成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/http.ChunkMergeResponse'
+              type: object
+        "400":
+          description: 请求参数错误或分片不完整
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 合并文件分片
+      tags:
+      - 上传
+  /upload/multiple:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 一次上传多个文件
+      parameters:
+      - description: 要上传的多个文件
+        in: formData
+        name: files
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 上传成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/http.MultipleUploadResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 多文件上传
+      tags:
+      - 上传
+  /upload/single:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 上传单个文件
+      parameters:
+      - description: 要上传的文件
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 上传成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/http.SingleUploadResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 单文件上传
+      tags:
+      - 上传
+swagger: "2.0"

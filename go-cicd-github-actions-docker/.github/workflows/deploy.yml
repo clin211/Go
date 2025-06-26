@@ -1,0 +1,248 @@
+name: Deploy to Production
+
+# 触发条件：当 main 分支有推送操作时
+on:
+  push:
+    branches: [ main ]
+  # 也可以手动触发
+  workflow_dispatch:
+
+# 环境变量
+env:
+  NAMESPACE: go-app
+  IMAGE_NAME: practice
+  REGISTRY: crpi-vfnhvlv6i4fvr8sf.cn-chengdu.personal.cr.aliyuncs.com
+
+jobs:
+  # 构建并推送 Docker 镜像
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: give version
+        run: |
+          echo "VERSION=$(git describe --tags --always --match='v*')" >> $GITHUB_ENV
+
+      - name: print version
+        run: |
+          echo "print version is ${{env.VERSION}}"
+
+      # 设置 Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # 登录到阿里云容器镜像服务
+      - name: Login to ACR
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.ALIYUN_USERNAME }}
+          password: ${{ secrets.ALIYUN_PASSWORD }}
+
+      # 构建并推送镜像
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./deployments/docker/prod/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+            ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+
+  # 部署到服务器
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      # 检出代码以获取版本信息
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 获取版本号
+      - name: Get version
+        run: |
+          echo "VERSION=$(git describe --tags --always --match='v*')" >> $GITHUB_ENV
+
+      # 通知服务器拉取镜像并部署
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          envs: REGISTRY,NAMESPACE,IMAGE_NAME,VERSION
+          script: |
+            # 登录到阿里云容器镜像仓库
+            echo "Authenticating with Alibaba Cloud Container Registry..."
+            docker login ${REGISTRY} -u ${{ secrets.ALIYUN_USERNAME }} -p ${{ secrets.ALIYUN_PASSWORD }}
+
+            # 构建完整的镜像名称
+            FULL_IMAGE_NAME=${REGISTRY}/${NAMESPACE}/${IMAGE_NAME}:${VERSION}
+
+            echo "Deploying version: ${VERSION}"
+
+            # 拉取新镜像
+            echo "Pulling image: ${FULL_IMAGE_NAME}..."
+            docker pull ${FULL_IMAGE_NAME}
+
+            # 定义容器名称
+            CONTAINER_NAME_1="${IMAGE_NAME}-1"
+            CONTAINER_NAME_2="${IMAGE_NAME}-2"
+
+            # 确保服务器上的配置目录存在
+            mkdir -p /home/go-app/practice/configs
+
+            # 验证配置文件存在
+            if [ ! -f "/home/go-app/practice/configs/config.yaml" ]; then
+              echo "Warning: Config file does not exist at /home/go-app/practice/configs/config.yaml"
+              echo "Container will use the default embedded config, please create a custom config if needed"
+            else
+              echo "Found config file at /home/go-app/practice/configs/config.yaml"
+            fi
+
+            # 找出要更新的容器
+            # 检查两个容器中哪一个最旧
+            CONTAINER_1_CREATED=$(docker inspect ${CONTAINER_NAME_1} --format '{{.Created}}' 2>/dev/null || echo "")
+            CONTAINER_2_CREATED=$(docker inspect ${CONTAINER_NAME_2} --format '{{.Created}}' 2>/dev/null || echo "")
+
+            # 初始部署 - 两个容器都不存在
+            if [ -z "$CONTAINER_1_CREATED" ] && [ -z "$CONTAINER_2_CREATED" ]; then
+              echo "Initial deployment - starting both containers..."
+
+              # 创建容器1
+              echo "Creating container 1 (${CONTAINER_NAME_1}) on port 18080..."
+              docker create \
+                --name ${CONTAINER_NAME_1} \
+                -p 18080:18080 \
+                --restart always \
+                ${FULL_IMAGE_NAME}
+
+              # 如果配置文件存在，复制到容器
+              if [ -f "/home/go-app/practice/configs/config.yaml" ]; then
+                # 将配置复制到容器中
+                echo "Copying configuration to container ${CONTAINER_NAME_1}..."
+                docker cp /home/go-app/practice/configs/config.yaml ${CONTAINER_NAME_1}:/app/configs/config.yaml
+
+                # 验证配置文件是否成功复制
+                echo "Verifying configuration in container ${CONTAINER_NAME_1}..."
+                docker exec ${CONTAINER_NAME_1} ls -la /app/configs/
+                echo "Config file contents:"
+                docker exec ${CONTAINER_NAME_1} cat /app/configs/config.yaml | head -n 10
+              fi
+
+              # 启动容器
+              docker start ${CONTAINER_NAME_1}
+
+              # 验证容器1启动状态
+              if [ "$(docker inspect -f '{{.State.Running}}' ${CONTAINER_NAME_1})" != "true" ]; then
+                echo "Container ${CONTAINER_NAME_1} failed to start!"
+                docker logs ${CONTAINER_NAME_1}
+                exit 1
+              fi
+
+              echo "Container ${CONTAINER_NAME_1} started successfully."
+
+              # 创建容器2
+              echo "Creating container 2 (${CONTAINER_NAME_2}) on port 18081..."
+              docker create \
+                --name ${CONTAINER_NAME_2} \
+                -p 18081:18080 \
+                --restart always \
+                ${FULL_IMAGE_NAME}
+
+              # 如果配置文件存在，复制到容器
+              if [ -f "/home/go-app/practice/configs/config.yaml" ]; then
+                # 将配置复制到容器中
+                echo "Copying configuration to container ${CONTAINER_NAME_2}..."
+                docker cp /home/go-app/practice/configs/config.yaml ${CONTAINER_NAME_2}:/app/configs/config.yaml
+
+                # 验证配置文件是否成功复制
+                echo "Verifying configuration in container ${CONTAINER_NAME_2}..."
+                docker exec ${CONTAINER_NAME_2} ls -la /app/configs/
+                echo "Config file contents:"
+                docker exec ${CONTAINER_NAME_2} cat /app/configs/config.yaml | head -n 10
+              fi
+
+              # 启动容器
+              docker start ${CONTAINER_NAME_2}
+
+              # 验证容器2启动状态
+              if [ "$(docker inspect -f '{{.State.Running}}' ${CONTAINER_NAME_2})" != "true" ]; then
+                echo "Container ${CONTAINER_NAME_2} failed to start!"
+                docker logs ${CONTAINER_NAME_2}
+                exit 1
+              fi
+
+              echo "Container ${CONTAINER_NAME_2} started successfully."
+
+            # 更新部署 - 确定要更新的容器
+            else
+              # 如果容器1不存在，更新容器1
+              if [ -z "$CONTAINER_1_CREATED" ]; then
+                CONTAINER_TO_UPDATE=${CONTAINER_NAME_1}
+                PORT="18080"
+              # 如果容器2不存在，更新容器2
+              elif [ -z "$CONTAINER_2_CREATED" ]; then
+                CONTAINER_TO_UPDATE=${CONTAINER_NAME_2}
+                PORT="18081"
+              # 如果都存在，更新创建时间较早的容器
+              elif [ "$CONTAINER_1_CREATED" \< "$CONTAINER_2_CREATED" ]; then
+                CONTAINER_TO_UPDATE=${CONTAINER_NAME_1}
+                PORT="18080"
+              else
+                CONTAINER_TO_UPDATE=${CONTAINER_NAME_2}
+                PORT="18081"
+              fi
+
+              echo "Updating container: ${CONTAINER_TO_UPDATE} on port ${PORT}..."
+
+              # 停止并删除旧容器
+              docker stop ${CONTAINER_TO_UPDATE} || true
+              docker rm ${CONTAINER_TO_UPDATE} || true
+
+              # 创建新容器
+              echo "Creating new container: ${CONTAINER_TO_UPDATE}..."
+              docker create \
+                --name ${CONTAINER_TO_UPDATE} \
+                -p ${PORT}:18080 \
+                --restart always \
+                ${FULL_IMAGE_NAME}
+
+              # 如果配置文件存在，复制到容器
+              if [ -f "/home/go-app/practice/configs/config.yaml" ]; then
+                # 将配置复制到容器中
+                echo "Copying configuration to container ${CONTAINER_TO_UPDATE}..."
+                docker cp /home/go-app/practice/configs/config.yaml ${CONTAINER_TO_UPDATE}:/app/configs/config.yaml
+
+                # 验证配置文件是否成功复制
+                echo "Verifying configuration in container ${CONTAINER_TO_UPDATE}..."
+                docker exec ${CONTAINER_TO_UPDATE} ls -la /app/configs/
+                echo "Config file contents:"
+                docker exec ${CONTAINER_TO_UPDATE} cat /app/configs/config.yaml | head -n 10
+              fi
+
+              # 启动容器
+              docker start ${CONTAINER_TO_UPDATE}
+
+              # 验证容器启动状态
+              if [ "$(docker inspect -f '{{.State.Running}}' ${CONTAINER_TO_UPDATE})" != "true" ]; then
+                echo "Container ${CONTAINER_TO_UPDATE} failed to start!"
+                docker logs ${CONTAINER_TO_UPDATE}
+                exit 1
+              fi
+
+              echo "Container ${CONTAINER_TO_UPDATE} updated successfully."
+            fi
+
+            # 清理未使用镜像
+            echo "Cleaning up unused images..."
+            docker image prune -f
+
+            echo "Deployment completed successfully!"

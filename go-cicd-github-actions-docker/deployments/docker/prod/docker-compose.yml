@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: deployments/docker/Dockerfile
+    container_name: user-service-api
+    ports:
+      - "18080:18080"
+    environment:
+      - GIN_MODE=release
+    restart: unless-stopped
+    networks:
+      - user-service-network
+
+networks:
+  user-service-network:
+    driver: bridge

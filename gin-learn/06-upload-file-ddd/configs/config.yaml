@@ -1,0 +1,37 @@
+server:
+  port: 8080
+  host: localhost
+  timeout: 60
+
+upload:
+  # 存储提供商: "local"或"oss"
+  provider: "local"
+
+  # 最大文件大小（字节），100MB
+  max_file_size: 104857600
+
+  # 批量上传的最大文件数
+  max_files: 10
+
+  # 允许的文件扩展名（空数组表示允许所有）
+  allowed_extensions: []
+
+  # 本地存储设置
+  local:
+    upload_dir: "./uploads"
+    temp_chunk_dir: "./temp_chunks"
+
+  # OSS存储设置
+  oss:
+    bucket: "your-bucket-name"
+    endpoint: "oss-cn-hangzhou.aliyuncs.com"
+    access_key: ""
+    secret_key: ""
+    url_prefix: ""
+    temp_chunk_dir: "./temp_chunks"
+
+logging:
+  # 日志级别: debug, info, warn, error, fatal
+  level: "info"
+  # 日志文件路径
+  file: ""

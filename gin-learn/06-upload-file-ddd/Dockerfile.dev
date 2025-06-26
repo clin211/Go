@@ -1,0 +1,23 @@
+FROM golang:1.20-alpine
+
+# 设置工作目录
+WORKDIR /app
+
+# 安装必要的工具
+RUN apk add --no-cache git curl gcc musl-dev bash
+
+# 安装 Air 用于热重载
+RUN go install github.com/cosmtrek/air@latest &&
+    go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+# 将二进制添加到PATH
+ENV PATH="$PATH:/go/bin"
+
+# 创建目录
+RUN mkdir -p uploads temp_chunks
+
+# 暴露端口
+EXPOSE 8080
+
+# 使用air作为默认启动命令
+CMD ["air"]

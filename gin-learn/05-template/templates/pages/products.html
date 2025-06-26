@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goods Page</title>
+    <script type="module" src="/static/js/tailwindcssv4.js"></script>
+    <script type="module" src="/static/js/axios.min.js"></script>
+    <style>
+        /* 简约风格自定义样式 */
+        body {
+            background-color: #fafafa;
+            color: #333;
+        }
+
+        .product-card {
+            transition: transform 0.2s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+        }
+
+        /* 自定义模态窗口背景 */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(3px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <h1 class="text-2xl font-medium text-center mb-10 text-gray-800">Products</h1>
+
+        <!-- Loading State -->
+        <div id="loading" class="flex justify-center items-center py-16">
+            <div class="w-10 h-10 border-t-2 border-gray-400 rounded-full animate-spin"></div>
+        </div>
+
+        <!-- No Results State -->
+        <div id="noResults" class="hidden text-center py-16">
+            <p class="text-gray-500">No products available</p>
+        </div>
+
+        <!-- Products Grid -->
+        <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-10">
+            <!-- Product cards will be dynamically inserted here -->
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex justify-center my-8">
+            <div class="flex items-center space-x-1">
+                <button id="prevPage" class="px-3 py-1 rounded text-sm text-gray-600 hover:bg-gray-100">
+                    ←
+                </button>
+                <div id="paginationNumbers" class="flex space-x-1">
+                    <!-- Pagination numbers will be dynamically inserted here -->
+                </div>
+                <button id="nextPage" class="px-3 py-1 rounded text-sm text-gray-600 hover:bg-gray-100">
+                    →
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Pagination (Only shown on small screens) -->
+        <div class="flex justify-between sm:hidden mb-8 px-4">
+            <button id="prevPageMobile"
+                class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded">Previous</button>
+            <button id="nextPageMobile" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded">Next</button>
+        </div>
+
+        <!-- Product Detail Modal -->
+        <div id="productModal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 m-4 relative shadow-md">
+                <button id="closeModal" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <div id="modalContent" class="flex flex-col md:flex-row gap-8 mt-2">
+                    <!-- Modal content will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let allProducts = [];
+        let currentPage = 1;
+        const itemsPerPage = 8;
+
+        // DOM Elements
+        const loadingEl = document.getElementById('loading');
+        const noResultsEl = document.getElementById('noResults');
+        const productsGridEl = document.getElementById('productsGrid');
+        const prevPageBtn = document.getElementById('prevPage');
+        const nextPageBtn = document.getElementById('nextPage');
+        const prevPageMobileBtn = document.getElementById('prevPageMobile');
+        const nextPageMobileBtn = document.getElementById('nextPageMobile');
+        const paginationNumbersEl = document.getElementById('paginationNumbers');
+        const productModalEl = document.getElementById('productModal');
+        const closeModalBtn = document.getElementById('closeModal');
+        const modalContentEl = document.getElementById('modalContent');
+
+        // Fetch products from API
+        async function fetchProducts () {
+            try {
+                loadingEl.classList.remove('hidden');
+                productsGridEl.classList.add('hidden');
+                noResultsEl.classList.add('hidden');
+
+                const response = await axios.get('https://fakestoreapi.com/products');
+                allProducts = response.data;
+
+                // Initial render
+                renderProducts();
+                updatePagination();
+
+                loadingEl.classList.add('hidden');
+                productsGridEl.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error fetching products:', error);
+                loadingEl.classList.add('hidden');
+                noResultsEl.classList.remove('hidden');
+            }
+        }
+
+        // Render products to the grid
+        function renderProducts () {
+            productsGridEl.innerHTML = '';
+
+            if (allProducts.length === 0) {
+                noResultsEl.classList.remove('hidden');
+                productsGridEl.classList.add('hidden');
+                return;
+            }
+
+            noResultsEl.classList.add('hidden');
+            productsGridEl.classList.remove('hidden');
+
+            // Calculate pagination slice
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedProducts = allProducts.slice(startIndex, endIndex);
+
+            // Render products for current page
+            paginatedProducts.forEach(product => {
+                const productCard = createProductCard(product);
+                productsGridEl.appendChild(productCard);
+            });
+        }
+
+        // Create a product card element
+        function createProductCard (product) {
+            const card = document.createElement('div');
+            card.className = 'product-card bg-white rounded overflow-hidden hover:shadow-sm';
+            card.setAttribute('data-product-id', product.id);
+
+            card.innerHTML = `
+                <div class="relative pt-[100%] bg-white">
+                    <img src="${product.image}" alt="${product.title}"
+                        class="absolute top-0 left-0 w-full h-full object-contain p-6">
+                </div>
+                <div class="p-4">
+                    <div class="text-xs text-gray-500 mb-1">${product.category}</div>
+                    <h3 class="text-sm font-medium text-gray-800 mb-2 truncate" title="${product.title}">${product.title}</h3>
+                    <div class="flex items-center justify-between">
+                        <span class="text-base font-medium">$${product.price.toFixed(2)}</span>
+                        <button class="view-details-btn text-xs text-gray-600 hover:text-gray-900 underline">
+                            Details
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            card.querySelector('.view-details-btn').addEventListener('click', () => {
+                showProductModal(product);
+            });
+
+            // Make the entire card clickable
+            card.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('view-details-btn')) {
+                    showProductModal(product);
+                }
+            });
+
+            return card;
+        }
+
+        // Show product modal with details
+        function showProductModal (product) {
+            modalContentEl.innerHTML = `
+                <div class="md:w-1/2 flex justify-center items-start">
+                    <img src="${product.image}" alt="${product.title}" class="max-h-[250px] object-contain">
+                </div>
+                <div class="md:w-1/2">
+                    <div class="text-xs text-gray-500 mb-1">${product.category}</div>
+                    <h2 class="text-xl font-medium text-gray-800 mb-2">${product.title}</h2>
+                    <div class="text-xl font-medium mb-4">$${product.price.toFixed(2)}</div>
+                    <p class="text-sm text-gray-600 mb-6 leading-relaxed">${product.description}</p>
+                    <button class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2 px-4 rounded transition-colors">
+                        Add to Cart
+                    </button>
+                </div>
+            `;
+
+            productModalEl.classList.remove('hidden');
+            // Prevent scrolling on the body when modal is open
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close product modal
+        function closeProductModal () {
+            productModalEl.classList.add('hidden');
+            // Restore scrolling on the body
+            document.body.style.overflow = '';
+        }
+
+        // Update pagination
+        function updatePagination () {
+            const totalPages = Math.ceil(allProducts.length / itemsPerPage);
+
+            // Disable/enable pagination buttons
+            prevPageBtn.disabled = currentPage === 1;
+            nextPageBtn.disabled = currentPage === totalPages;
+            prevPageMobileBtn.disabled = currentPage === 1;
+            nextPageMobileBtn.disabled = currentPage === totalPages;
+
+            // Add visual indication for disabled buttons
+            prevPageBtn.classList.toggle('opacity-30', currentPage === 1);
+            nextPageBtn.classList.toggle('opacity-30', currentPage === totalPages);
+            prevPageMobileBtn.classList.toggle('opacity-30', currentPage === 1);
+            nextPageMobileBtn.classList.toggle('opacity-30', currentPage === totalPages);
+
+            // Generate pagination numbers
+            paginationNumbersEl.innerHTML = '';
+
+            // Show fewer page numbers for simplicity
+            let startPage = Math.max(1, currentPage - 1);
+            let endPage = Math.min(totalPages, startPage + 2);
+
+            // Adjust if we're near the end
+            if (endPage - startPage < 2) {
+                startPage = Math.max(1, endPage - 2);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.className = `w-8 h-8 flex items-center justify-center rounded text-sm ${i === currentPage
+                    ? 'bg-gray-800 text-white'
+                    : 'text-gray-600 hover:bg-gray-100'
+                    }`;
+                pageButton.textContent = i;
+
+                pageButton.addEventListener('click', () => {
+                    currentPage = i;
+                    renderProducts();
+                    updatePagination();
+                });
+
+                paginationNumbersEl.appendChild(pageButton);
+            }
+        }
+
+        // Event listeners
+        function setupEventListeners () {
+            // Pagination
+            prevPageBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderProducts();
+                    updatePagination();
+                }
+            });
+
+            nextPageBtn.addEventListener('click', () => {
+                const totalPages = Math.ceil(allProducts.length / itemsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderProducts();
+                    updatePagination();
+                }
+            });
+
+            prevPageMobileBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderProducts();
+                    updatePagination();
+                }
+            });
+
+            nextPageMobileBtn.addEventListener('click', () => {
+                const totalPages = Math.ceil(allProducts.length / itemsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderProducts();
+                    updatePagination();
+                }
+            });
+
+            // Modal
+            closeModalBtn.addEventListener('click', closeProductModal);
+
+            // Close modal when clicking outside
+            productModalEl.addEventListener('click', (e) => {
+                if (e.target === productModalEl) {
+                    closeProductModal();
+                }
+            });
+
+            // Close modal on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeProductModal();
+                }
+            });
+        }
+
+        // Initialize the application
+        function init () {
+            fetchProducts();
+            setupEventListeners();
+        }
+
+        // Start the app
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

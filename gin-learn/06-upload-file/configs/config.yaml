@@ -1,0 +1,31 @@
+# Server
+server:
+  port: 8080
+  mode: debug # debug, release
+  read_timeout: 10s
+  write_timeout: 10s
+
+# Logger
+logger:
+  level: debug # debug, info, warn, error, fatal, panic
+  format: json # json, console
+
+# 本地上传配置
+local:
+  upload_dir: ./upload/dir
+  allowed_extensions: [ ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" ]
+  max_file_size: 52428800 # 50MB
+
+# Aliyun OSS 配置
+ali_oss:
+  access_key_id: your_access_key_id
+  access_key_secret: your_access_key_secret
+  bucket_name: your_bucket_name
+  endpoint: oss-cn-hangzhou.aliyuncs.com
+
+# MinIO 配置
+minio:
+  access_key: your_access_key
+  secret_key: your_secret_key
+  bucket_name: your_bucket_name
+  endpoint: http://minio:9000

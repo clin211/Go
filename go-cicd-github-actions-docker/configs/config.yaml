@@ -1,0 +1,41 @@
+server:
+  mode: "release" # debug, release
+  bind: "0.0.0.0"
+  port: 18080
+
+database:
+  # 记得更改成自己的连接配置
+  master:
+    type: mysql
+    host: localhost
+    port: 11006
+    user: root
+    password: 123456
+    db-name: practice
+    max-open: 100
+    max-idle: 10
+    max-lifetime: 300000000000 # 300s 内可复用
+  slave:
+    type: mysql
+    host: localhost
+    port: 11006
+    user: root
+    password: 123456
+    db-name: practice
+    max-open: 100
+    max-idle: 10
+    max-lifetime: 300000000000
+redis:
+  # 记得更改成自己的连接配置
+  addr: localhost:16000
+  password: 123456
+  pool_size: 10
+  db: 0
+
+# 日志配置
+log:
+  disable-caller: false
+  disable-stacktrace: false
+  level: debug
+  format: json
+  output-paths: [ ./logs/server.log, stdout ]

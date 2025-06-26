@@ -1,0 +1,40 @@
+# .air.toml 配置文件
+# 适用于文件上传系统
+
+root = "."
+tmp_dir = "tmp"
+
+[build]
+# 只需要编译 main 文件
+cmd = "go build -o ./tmp/main ./cmd/main.go"
+# 二进制文件路径
+bin = "tmp"
+# 自定义二进制执行命令
+full_bin = "./tmp/main"
+# 监听这些文件扩展名的变化
+include_ext = ["go", "yaml", "toml", "html"]
+# 忽略这些文件夹
+exclude_dir = ["uploads", "temp_chunks", "tmp", "build", "vendor"]
+# 忽略这些文件
+exclude_file = []
+# 是否自动停止进程并重建
+stop_on_error = true
+# 发送系统通知
+send_interrupt = true
+# 延迟时间
+delay = 1000 # ms
+
+[log]
+# 显示日志
+time = true
+
+[color]
+# 自定义颜色
+main = "magenta"
+watcher = "cyan"
+build = "yellow"
+runner = "green"
+
+[misc]
+# 删除临时目录
+clean_on_exit = true

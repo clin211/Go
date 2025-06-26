@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{{.Title}}</title>
+    <script type="module" src="/static/tailwindcssv4.js"></script>
+    <script src="/static/axios.min.js"></script>
+</head>
+
+<body>
+    <p>detail</p>
+    {{ template "header.html" . }}
+    <div class="content">
+        {{ template "content.html" . }}
+    </div>
+    {{ template "footer.html" . }}
+
+    <script>
+        const result = axios.get('https://fakestoreapi.com/products/1')
+        console.log('result:', result)
+    </script>
+</body>
+
+</html>

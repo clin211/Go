@@ -1,0 +1,36 @@
+server:
+  port: 8080
+  host: "localhost"
+  timeout: 30
+
+upload:
+  # 存储提供商: "local" 或 "oss"
+  provider: "local"
+  max_file_size: 10485760 # 10MB
+  max_files: 10
+  allowed_extensions:
+  - ".jpg"
+  - ".jpeg"
+  - ".png"
+  - ".gif"
+  - ".pdf"
+  - ".doc"
+  - ".docx"
+  # 本地存储配置
+  local:
+    upload_dir: "./uploads"
+    temp_chunk_dir: "./temp_chunks"
+
+  # 阿里云OSS配置
+  oss:
+    bucket: "your-bucket-name"
+    endpoint: "oss-cn-hangzhou.aliyuncs.com"
+    access_key: "your-access-key"
+    secret_key: "your-secret-key"
+    # 可选: 访问URL前缀，若不设置则自动构建
+    url_prefix: "https://your-bucket-name.oss-cn-hangzhou.aliyuncs.com/"
+    temp_chunk_dir: "./temp_chunks"
+
+logging:
+  level: "info" # debug, info, warn, error
+  file: "logs/app.log"

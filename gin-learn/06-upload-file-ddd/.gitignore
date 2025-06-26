@@ -1,0 +1,34 @@
+# 编译结果
+/build/
+/tmp/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# 测试二进制文件
+*.test
+*.tmp
+*.prof
+
+# 输出文件
+/uploads/
+/temp_chunks/
+
+# 工具生成的文件
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# air生成的临时文件
+.air.conf
+/tmp/
+
+# 依赖
+/vendor/
+
+# Docker相关
+.dockerignore

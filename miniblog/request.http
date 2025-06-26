@@ -1,0 +1,20 @@
+@baseUrl = http://localhost:8080
+
+### login
+POST {{{{baseUrl}}}}/login
+Content-Type: application/json
+
+{
+    "username": "changlin9",
+    "password": "123456"
+}
+
+### create a post
+POST {{{{baseUrl}}}}/v1/posts
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJYLVVzZXJuYW1lIjoiY2hhbmdsaW45IiwiZXhwIjoyMDYxNjg0MDExLCJpYXQiOjE3MDE2ODQwMTEsIm5iZiI6MTcwMTY4NDAxMX0.PZ82Cj_coFIfQ6urAodmJvs8_5ni92AqzXbmc5CWGmk
+
+{
+    "title": "Gin web 框架",
+    "content": "Gin 是一个用 Go (Golang) 编写的 HTTP web 框架。 它是一个类似于 [martini](https://github.com/go-martini/martini) 但拥有更好性能的 API 框架, 优于 [httprouter](https://github.com/julienschmidt/httprouter)，速度提高了近 40 倍"
+}
