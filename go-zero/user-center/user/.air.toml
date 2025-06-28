@@ -1,0 +1,38 @@
+# Air 热重载工具的配置文件，针对 go-zero 项目优化
+
+# 工作目录
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  # 构建命令：编译我们的 user 服务
+  cmd = "go build -o ./tmp/main ./user.go"
+  # 生成的二进制文件
+  bin = "tmp/main"
+  # 运行命令：启动服务并指定配置文件
+  full_bin = "./tmp/main -f etc/user-api.yaml"
+  # 监视这些文件类型的变化
+  include_ext = ["go", "yaml", "yml", "toml"]
+  # 忽略这些目录
+  exclude_dir = ["tmp", "vendor", ".git"]
+  # 排除测试文件
+  exclude_regex = ["_test\\.go"]
+  # 当文件变化时立即重建
+  delay = 1000
+  # 构建错误时停止旧进程
+  stop_on_error = true
+
+[log]
+  # 不显示时间戳，让日志更清爽
+  time = false
+
+[color]
+  # 彩色输出，让日志更美观
+  main = "magenta"
+  watcher = "cyan"
+  build = "yellow"
+  runner = "green"
+
+[misc]
+  # 退出时清理临时文件
+  clean_on_exit = true
