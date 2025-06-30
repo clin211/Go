@@ -8,8 +8,38 @@ type Response {
 	Message string `json:"message"`
 }
 
+// 注册
+type RegisterReq {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
+}
+
+type RegisterRes {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+// 登录
+type LoginReq {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type LoginRes {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Token   string `json:"token"`
+}
+
 service user-api {
 	@handler UserHandler
 	get /from/:name (Request) returns (Response)
+
+	@handler Register
+	post /api/user/register (RegisterReq) returns (RegisterRes)
+
+	@handler login
+	post /api/user/login (LoginReq) returns (LoginRes)
 }
 
